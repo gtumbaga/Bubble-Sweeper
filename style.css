@@ -197,7 +197,7 @@ body {
 }
 
 /* 6. Flagged state: set by a long press (see script.js) instead of popping.
-   Shows a flag marker and a highlighted ring around the still-unpopped bubble. */
+   Shows a blinking LED marker and a highlighted ring around the still-unpopped bubble. */
 .bubble-wrap.flagged .bubble {
   cursor: default;
   box-shadow:
@@ -206,31 +206,26 @@ body {
     0 0 0 3px rgba(250, 204, 21, 0.8);
 }
 
-.bubble-wrap.flagged::after {
+.bubble-wrap.flagged::before {
   content: "";
   position: absolute;
-  inset: 0;
-  z-index: 2;
-  pointer-events: none;
-  background: no-repeat center / 26px 26px
-    radial-gradient(circle, rgba(15, 23, 42, 0.15) 0%, rgba(15, 23, 42, 0) 70%);
-  animation: flag-pop 0.3s ease-out;
-}
-
-.bubble-wrap.flagged::before {
-  content: "\26A0\FE0F"; /* ⚠️ */
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 26px;
-  line-height: 1;
+  top: 50%;
+  left: 50%;
+  width: 14px;
+  height: 14px;
+  margin: -7px 0 0 -7px;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle at 35% 35%,
+    #fecaca 0%,
+    #ef4444 55%,
+    #7f1d1d 100%
+  );
   z-index: 3;
   pointer-events: none;
-  animation: flag-pop 0.5s ease-out;
-  /*top: 8px;
-  left: 7px;*/
+  animation:
+    flag-pop 0.4s ease-out,
+    led-flash 1s ease-in-out infinite;
 }
 
 @keyframes flag-pop {
@@ -245,6 +240,18 @@ body {
   100% {
     transform: scale(1) rotate(0deg);
     opacity: 1;
+  }
+}
+
+/* Continuous blink, like an LED indicator light */
+@keyframes led-flash {
+  0%, 100% {
+    opacity: 1;
+    box-shadow: 0 0 8px 3px rgba(239, 68, 68, 0.9);
+  }
+  50% {
+    opacity: 0.3;
+    box-shadow: 0 0 2px 1px rgba(239, 68, 68, 0.3);
   }
 }
 
@@ -277,3 +284,27 @@ body {
 .count[data-count="6"] { color: #22d3ee; }
 .count[data-count="7"] { color: #e5e7eb; }
 .count[data-count="8"] { color: #9ca3af; }
+
+/* 8. Game over: once a mine is popped, every mine is revealed and the
+   whole grid is locked so no further bubbles can be interacted with. */
+.bubblewrap-container.game-over {
+  pointer-events: none;
+}
+
+.bubble-wrap.revealed-mine .bubble {
+  outline: 3px solid #ef4444;
+  outline-offset: 2px;
+}
+
+.bubble-wrap.revealed-mine::after {
+  content: "\1F4A3"; /* 💣 */
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  line-height: 1;
+  z-index: 4;
+  pointer-events: none;
+}

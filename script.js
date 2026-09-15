@@ -1,7 +1,57 @@
 const popSound = document.getElementById('pop-sound');
 const multiPopSound = document.getElementById('multi-pop-sound');
+const warningSound = document.getElementById('warning-sound');
+const warningSoundReverse = document.getElementById('warning-sound-reverse');
+const loseSound = document.getElementById('lose-sound');
+
+
+
 const LONG_PRESS_MS = 300;
 const SHARDS_PER_BUBBLE = 6;
+
+// Regular <audio> elements can't play backwards (no negative playbackRate
+// support), so the warning sound is decoded into a Web Audio buffer once,
+// then played forwards (flagging) or from a reversed copy (unflagging).
+const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+const audioContext = new AudioContextClass();
+let warningBufferPromise = null;
+let reversedWarningBuffer = null;
+
+
+
+const getReversedWarningBuffer = (buffer) => {
+  if (!reversedWarningBuffer) {
+    reversedWarningBuffer = audioContext.createBuffer(
+      buffer.numberOfChannels,
+      buffer.length,
+      buffer.sampleRate
+    );
+
+    for (let channel = 0; channel < buffer.numberOfChannels; channel += 1) {
+      const original = buffer.getChannelData(channel);
+      const flipped = reversedWarningBuffer.getChannelData(channel);
+      for (let i = 0; i < original.length; i += 1) {
+        flipped[i] = original[original.length - 1 - i];
+      }
+    }
+  }
+
+  return reversedWarningBuffer;
+};
+
+// Plays the warning sound forwards when flagging, or reversed when unflagging.
+const playWarningSound = async (reverse) => {
+
+  if (!reverse) {
+    const sound = warningSound.cloneNode();
+    sound.play();
+    return;
+  }
+  const reversed = warningSoundReverse.cloneNode();
+  reversed.play();
+  return;
+
+};
 
 // Loads debug.css (which visually flags mines) when ?debug=1 is in the URL.
 const params = new URLSearchParams(window.location.search);
@@ -12,7 +62,7 @@ if (params.get('debug') === '1') {
   document.head.appendChild(debugStyles);
 }
 
-let fieldSize = 5;
+let fieldSize = 6;
 const MINE_RATIO = 0.15;
 
 // Randomly marks a subset of the already-created bubbles as mines by
@@ -121,6 +171,21 @@ const revealCascade = (wraps, size, startIndex) => {
   }
 };
 
+// Ends the game after a mine is popped: plays the lose sound, reveals every
+// mine on the board, and locks the grid so no more bubbles can be interacted with.
+const triggerGameOver = () => {
+  const sound = loseSound.cloneNode();
+  sound.play();
+
+  bubbleWraps.forEach((wrap) => {
+    if (wrap.classList.contains('mine')) {
+      wrap.classList.add('revealed-mine');
+    }
+  });
+
+  container.classList.add('game-over');
+};
+
 const container = document.querySelector('.bubblewrap-container');
 
 const createBubbleWrap = () => {
@@ -151,7 +216,10 @@ const wireUpBubble = (wrap, index) => {
   const toggleFlag = () => {
     // Already popped bubbles can't be flagged or re-flagged.
     if (bubble.checked) return;
-    wrap.classList.toggle('flagged');
+    const isNowFlagged = wrap.classList.toggle('flagged');
+    // Play forwards when flagging, reversed when unflagging.
+    playWarningSound(!isNowFlagged);
+
   };
 
   const startPress = (event) => {
@@ -197,6 +265,11 @@ const wireUpBubble = (wrap, index) => {
 
   bubble.addEventListener('change', () => {
     if (bubble.checked) {
+      if (wrap.classList.contains('mine')) {
+        triggerGameOver();
+        return;
+      }
+
       // Clone the node so overlapping pops (rapid clicks) can all play at once
       const sound = popSound.cloneNode();
       sound.play();
@@ -211,6 +284,7 @@ const bubbleWraps = [];
 const startNewGame = () => {
   // Clear out any bubbles from a previous game.
   container.innerHTML = '';
+  container.classList.remove('game-over');
   bubbleWraps.length = 0;
 
   // Let the CSS grid know how many columns/rows to lay out.
