@@ -1,0 +1,230 @@
+body {
+  background-color: #1e293b; /* Dark background to make bubbles stand out */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  margin: 0;
+}
+
+/* 1. Create the grid layout for the sheet */
+.bubblewrap-container {
+  display: grid;
+  /* Column count is driven by the --field-size custom property, set in script.js */
+  grid-template-columns: repeat(var(--field-size, 5), 60px);
+  gap: 10px;
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+/* Wraps each bubble + its remnant shards so they can be positioned together */
+.bubble-wrap {
+  position: relative;
+  width: 60px;
+  height: 60px;
+  display: block;
+  user-select: none;
+  -webkit-touch-callout: none; /* Avoid the mobile long-press callout menu */
+}
+
+/* 2. Style the checkbox to look like an unpopped bubble */
+.bubble {
+  appearance: none;
+  -webkit-appearance: none;
+  position: absolute;
+  inset: 0;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  cursor: pointer;
+  touch-action: manipulation; /* Optimizes for mobile tapping */
+  z-index: 1;
+
+  /* Create a 3D glass/glossy sphere using radial gradients */
+  background: radial-gradient(
+    circle at 35% 35%,
+    rgba(255, 255, 255, 0.6) 0%,
+    rgba(173, 216, 230, 0.4) 40%,
+    rgba(70, 130, 180, 0.6) 70%,
+    rgba(0, 0, 0, 0.2) 100%
+  );
+  box-shadow:
+    inset 0 4px 6px rgba(255, 255, 255, 0.4),
+    0 4px 8px rgba(0, 0, 0, 0.3);
+  transition: transform 0.1s ease;
+}
+
+/* Micro-interaction on press */
+.bubble:active {
+  transform: scale(0.92);
+}
+
+/* 3. Style the "Popped" state */
+.bubble:checked {
+  cursor: default;
+  /* Flatten the gradient and reverse the shadow direction to look deflated */
+  background: radial-gradient(
+    circle at 50% 50%,
+    rgba(255, 255, 255, 0.1) 0%,
+    rgba(140, 140, 140, 0.2) 60%,
+    rgba(0, 0, 0, 0.1) 100%
+  );
+  animation: pop 0.4s ease-out forwards;
+}
+
+/* 4. Animate the transition into the popped state so it looks like a burst */
+@keyframes pop {
+  0% {
+    transform: scale(1);
+    box-shadow:
+      inset 0 4px 6px rgba(255, 255, 255, 0.4),
+      0 4px 8px rgba(0, 0, 0, 0.3),
+      0 0 0 0 rgba(255, 255, 255, 0.5);
+  }
+  35% {
+    /* Overshoot outward like the film stretching right before it bursts */
+    transform: scale(1.3) rotate(-4deg);
+    box-shadow:
+      inset 0 2px 4px rgba(255, 255, 255, 0.2),
+      0 2px 4px rgba(0, 0, 0, 0.15),
+      0 0 0 14px rgba(255, 255, 255, 0);
+  }
+  55% {
+    transform: scale(0.85) rotate(3deg);
+  }
+  75% {
+    transform: scale(1.02) rotate(-1deg);
+  }
+  100% {
+    transform: scale(0.95) rotate(0deg);
+    box-shadow:
+      inset 0 2px 5px rgba(0, 0, 0, 0.5),
+      0 1px 2px rgba(255, 255, 255, 0.1),
+      0 0 0 0 rgba(255, 255, 255, 0);
+  }
+}
+
+/* 5. Leftover "shard" remnants: torn flaps of film that stay attached near
+   the center and fold outward, overlapping each other like the real thing. */
+.shard {
+  display: none;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 24px;
+  height: 30px;
+  margin: -30px 0 0 -12px; /* base of the flap sits exactly on the wrap's center */
+  background: linear-gradient(
+    170deg,
+    rgba(255, 255, 255, 0.55) 0%,
+    rgba(148, 163, 184, 0.4) 55%,
+    rgba(30, 41, 59, 0.3) 100%
+  );
+  /* Jagged, torn-edge flap shape rather than a clean triangle */
+  clip-path: polygon(
+    46% 0%,
+    58% 4%,
+    100% 62%,
+    88% 78%,
+    68% 100%,
+    32% 96%,
+    8% 70%,
+    0% 55%
+  );
+  opacity: 0;
+  transform-origin: 50% 100%; /* pivot at the base, like it's still attached */
+  transform: rotate(var(--shard-angle, 0deg)) translateY(0) scale(0.2);
+  pointer-events: none;
+  z-index: 0;
+  transition:
+    transform 0.5s cubic-bezier(0.2, 0.85, 0.3, 1.2),
+    opacity 0.4s ease-out;
+}
+
+/* Six flaps fanned evenly around the center (60deg apart) but pulled in
+   close enough that neighboring flaps overlap at their base, the way a
+   burst bubble's film folds back on itself instead of scattering. */
+.bubble:checked ~ .shard:nth-of-type(1) {
+  --shard-angle: 0deg;
+  transform: rotate(var(--shard-angle)) translateY(-14px) scale(0.95);
+  opacity: 0.7;
+}
+.bubble:checked ~ .shard:nth-of-type(2) {
+  --shard-angle: 60deg;
+  transform: rotate(var(--shard-angle)) translateY(-17px) scale(0.8);
+  opacity: 0.6;
+}
+.bubble:checked ~ .shard:nth-of-type(3) {
+  --shard-angle: 120deg;
+  transform: rotate(var(--shard-angle)) translateY(-13px) scale(1.05);
+  opacity: 0.75;
+}
+.bubble:checked ~ .shard:nth-of-type(4) {
+  --shard-angle: 180deg;
+  transform: rotate(var(--shard-angle)) translateY(-16px) scale(0.85);
+  opacity: 0.6;
+}
+.bubble:checked ~ .shard:nth-of-type(5) {
+  --shard-angle: 240deg;
+  transform: rotate(var(--shard-angle)) translateY(-14px) scale(1);
+  opacity: 0.7;
+}
+.bubble:checked ~ .shard:nth-of-type(6) {
+  --shard-angle: 300deg;
+  transform: rotate(var(--shard-angle)) translateY(-15px) scale(0.9);
+  opacity: 0.65;
+}
+
+/* 6. Flagged state: set by a long press (see script.js) instead of popping.
+   Shows a flag marker and a highlighted ring around the still-unpopped bubble. */
+.bubble-wrap.flagged .bubble {
+  cursor: default;
+  box-shadow:
+    inset 0 4px 6px rgba(255, 255, 255, 0.4),
+    0 4px 8px rgba(0, 0, 0, 0.3),
+    0 0 0 3px rgba(250, 204, 21, 0.8);
+}
+
+.bubble-wrap.flagged::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  background: no-repeat center / 26px 26px
+    radial-gradient(circle, rgba(15, 23, 42, 0.15) 0%, rgba(15, 23, 42, 0) 70%);
+  animation: flag-pop 0.3s ease-out;
+}
+
+.bubble-wrap.flagged::before {
+  content: "\26A0\FE0F"; /* ⚠️ */
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 26px;
+  line-height: 1;
+  z-index: 3;
+  pointer-events: none;
+  animation: flag-pop 0.5s ease-out;
+  top: 8px;
+  left: 7px;
+}
+
+@keyframes flag-pop {
+  0% {
+    transform: scale(0.4) rotate(-15deg);
+    opacity: 0;
+  }
+  60% {
+    transform: scale(1.15) rotate(6deg);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1) rotate(0deg);
+    opacity: 1;
+  }
+}
