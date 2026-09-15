@@ -1,13 +1,127 @@
 const popSound = document.getElementById('pop-sound');
+const multiPopSound = document.getElementById('multi-pop-sound');
 const LONG_PRESS_MS = 300;
 const SHARDS_PER_BUBBLE = 6;
 
+// Loads debug.css (which visually flags mines) when ?debug=1 is in the URL.
+const params = new URLSearchParams(window.location.search);
+if (params.get('debug') === '1') {
+  const debugStyles = document.createElement('link');
+  debugStyles.rel = 'stylesheet';
+  debugStyles.href = 'debug.css';
+  document.head.appendChild(debugStyles);
+}
+
 let fieldSize = 5;
+const MINE_RATIO = 0.15;
+
+// Randomly marks a subset of the already-created bubbles as mines by
+// shuffling their indices and tagging the first mineCount of them.
+const distributeMines = (wraps) => {
+  const mineCount = Math.round(wraps.length * MINE_RATIO);
+
+  const indices = wraps.map((_, index) => index);
+  for (let i = indices.length - 1; i > 0; i -= 1) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [indices[i], indices[j]] = [indices[j], indices[i]];
+  }
+
+  indices.slice(0, mineCount).forEach((index) => {
+    wraps[index].classList.add('mine');
+  });
+};
+
+// For every non-mine bubble, count how many of its 8 neighbors are mines
+// and render that count as a label (shown once the bubble is popped).
+const labelMineCounts = (wraps, size) => {
+  const isMine = (row, col) => {
+    if (row < 0 || row >= size || col < 0 || col >= size) return false;
+    return wraps[row * size + col].classList.contains('mine');
+  };
+
+  wraps.forEach((wrap, index) => {
+    if (wrap.classList.contains('mine')) return;
+
+    const row = Math.floor(index / size);
+    const col = index % size;
+    let count = 0;
+
+    for (let dr = -1; dr <= 1; dr += 1) {
+      for (let dc = -1; dc <= 1; dc += 1) {
+        if (dr === 0 && dc === 0) continue;
+        if (isMine(row + dr, col + dc)) count += 1;
+      }
+    }
+
+    // Always store the count (even 0) so the flood-fill reveal below can read it.
+    wrap.dataset.count = count;
+
+    if (count > 0) {
+      const label = document.createElement('span');
+      label.className = 'count';
+      label.dataset.count = count;
+      label.textContent = count;
+      wrap.appendChild(label);
+    }
+  });
+};
+
+// Returns the (bounds-checked) flat-array indices of a cell's 8 neighbors.
+const getNeighborIndices = (index, size) => {
+  const row = Math.floor(index / size);
+  const col = index % size;
+  const neighbors = [];
+
+  for (let dr = -1; dr <= 1; dr += 1) {
+    for (let dc = -1; dc <= 1; dc += 1) {
+      if (dr === 0 && dc === 0) continue;
+      const nRow = row + dr;
+      const nCol = col + dc;
+      if (nRow < 0 || nRow >= size || nCol < 0 || nCol >= size) continue;
+      neighbors.push(nRow * size + nCol);
+    }
+  }
+
+  return neighbors;
+};
+
+// Classic minesweeper flood fill: reveals the given cell, and if it has no
+// adjacent mines, keeps expanding into its neighbors (revealing numbered
+// bubbles as boundaries, but not expanding past them). Flagged bubbles are
+// left untouched so the player's flags aren't overridden.
+const revealCascade = (wraps, size, startIndex) => {
+  const stack = [startIndex];
+  const visited = new Set();
+  let additionalReveals = 0; // bubbles revealed beyond the one the user clicked
+
+  while (stack.length > 0) {
+    const index = stack.pop();
+    if (visited.has(index)) continue;
+    visited.add(index);
+
+    const wrap = wraps[index];
+    if (wrap.classList.contains('mine') || wrap.classList.contains('flagged')) continue;
+
+    const cellBubble = wrap.querySelector('.bubble');
+    if (!cellBubble.checked) additionalReveals += 1;
+    cellBubble.checked = true;
+
+    if (wrap.dataset.count !== '0') continue; // numbered cell: reveal but don't expand
+
+    getNeighborIndices(index, size).forEach((neighborIndex) => {
+      if (!visited.has(neighborIndex)) stack.push(neighborIndex);
+    });
+  }
+
+  // If the cascade spread past the clicked bubble, play a distinct sound
+  // for revealing multiple bubbles at once.
+  if (additionalReveals > 0) {
+    const sound = multiPopSound.cloneNode();
+    sound.play();
+  }
+};
 
 const container = document.querySelector('.bubblewrap-container');
-
-// Let the CSS grid know how many columns/rows to lay out.
-container.style.setProperty('--field-size', fieldSize);
 
 const createBubbleWrap = () => {
   const wrap = document.createElement('label');
@@ -29,7 +143,7 @@ const createBubbleWrap = () => {
   return wrap;
 };
 
-const wireUpBubble = (wrap) => {
+const wireUpBubble = (wrap, index) => {
   const bubble = wrap.querySelector('.bubble');
   let pressTimer = null;
   let isLongPress = false;
@@ -86,12 +200,41 @@ const wireUpBubble = (wrap) => {
       // Clone the node so overlapping pops (rapid clicks) can all play at once
       const sound = popSound.cloneNode();
       sound.play();
+
+      revealCascade(bubbleWraps, fieldSize, index);
     }
   });
 };
 
-for (let i = 0; i < fieldSize * fieldSize; i += 1) {
-  const wrap = createBubbleWrap();
-  container.appendChild(wrap);
-  wireUpBubble(wrap);
-}
+const bubbleWraps = [];
+
+const startNewGame = () => {
+  // Clear out any bubbles from a previous game.
+  container.innerHTML = '';
+  bubbleWraps.length = 0;
+
+  // Let the CSS grid know how many columns/rows to lay out.
+  container.style.setProperty('--field-size', fieldSize);
+
+  for (let i = 0; i < fieldSize * fieldSize; i += 1) {
+    const wrap = createBubbleWrap();
+    container.appendChild(wrap);
+    wireUpBubble(wrap, i);
+    bubbleWraps.push(wrap);
+  }
+
+  distributeMines(bubbleWraps);
+  labelMineCounts(bubbleWraps, fieldSize);
+};
+
+const newGameButton = document.getElementById('new-game-button');
+newGameButton.addEventListener('click', startNewGame);
+
+const fieldSizeSelector = document.querySelector('.field-size-selector');
+fieldSizeSelector.value = String(fieldSize);
+fieldSizeSelector.addEventListener('change', () => {
+  fieldSize = parseInt(fieldSizeSelector.value, 10);
+  startNewGame();
+});
+
+startNewGame();

@@ -6,9 +6,20 @@
 <body>
     <!-- Preloaded so the pop sound plays instantly with no load-time delay -->
     <audio id="pop-sound" src="pop.mp3" preload="auto"></audio>
+    <audio id="multi-pop-sound" src="multipop.mp3" preload="auto"></audio>
 
     <!-- Bubbles are generated dynamically in script.js based on fieldSize -->
-    <div class="bubblewrap-container"></div>
+    <div class="controls">
+        <button id="new-game-button">New Game</button>
+        <select class="field-size-selector">
+            <option value="5">5x5</option>
+            <option value="7">7x7</option>
+            <option value="9">9x9</option>
+        </select>
+    </div>
+    <div class="field-holder">
+        <div class="bubblewrap-container"></div>
+    </div>
 
     <script src="script.js"></script>
 </body>

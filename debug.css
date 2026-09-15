@@ -1,0 +1,19 @@
+/* Debug-only styles, loaded when ?debug=1 is present in the URL.
+   Makes it obvious at a glance which bubbles are mines. */
+.bubble-wrap.mine .bubble {
+  outline: 3px solid #ef4444;
+  outline-offset: 2px;
+}
+
+.bubble-wrap.mine::after {
+  content: "\1F4A3"; /* 💣 */
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  line-height: 1;
+  z-index: 4;
+  pointer-events: none;
+}

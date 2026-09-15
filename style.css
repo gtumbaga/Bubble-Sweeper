@@ -1,10 +1,25 @@
 body {
   background-color: #1e293b; /* Dark background to make bubbles stand out */
+  /*display: flex;
+  justify-content: center;
+  align-items: center;*/
+  min-height: 100vh;
+  margin: 0;
+  padding-top: 40px;
+}
+
+.field-holder {
+    margin-top: 40px;
   display: flex;
   justify-content: center;
   align-items: center;
-  min-height: 100vh;
-  margin: 0;
+}
+
+.controls {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
 }
 
 /* 1. Create the grid layout for the sheet */
@@ -31,6 +46,10 @@ body {
 
 /* 2. Style the checkbox to look like an unpopped bubble */
 .bubble {
+  /*reset existing styles*/
+  margin: 0;
+  padding: 0;
+
   appearance: none;
   -webkit-appearance: none;
   position: absolute;
@@ -210,8 +229,8 @@ body {
   z-index: 3;
   pointer-events: none;
   animation: flag-pop 0.5s ease-out;
-  top: 8px;
-  left: 7px;
+  /*top: 8px;
+  left: 7px;*/
 }
 
 @keyframes flag-pop {
@@ -228,3 +247,33 @@ body {
     opacity: 1;
   }
 }
+
+/* 7. Minesweeper-style number labels, showing how many neighboring
+   bubbles are mines. Hidden until the bubble is popped. */
+.count {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: system-ui, sans-serif;
+  font-weight: 700;
+  font-size: 20px;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 2;
+  transition: opacity 0.3s ease 0.15s;
+}
+
+.bubble:checked ~ .count {
+  opacity: 1;
+}
+
+.count[data-count="1"] { color: #60a5fa; }
+.count[data-count="2"] { color: #4ade80; }
+.count[data-count="3"] { color: #f87171; }
+.count[data-count="4"] { color: #a78bfa; }
+.count[data-count="5"] { color: #fbbf24; }
+.count[data-count="6"] { color: #22d3ee; }
+.count[data-count="7"] { color: #e5e7eb; }
+.count[data-count="8"] { color: #9ca3af; }
