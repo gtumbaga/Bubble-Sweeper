@@ -2,6 +2,7 @@ const popSound = document.getElementById('pop-sound');
 const multiPopSound = document.getElementById('multi-pop-sound');
 const warningSound = document.getElementById('warning-sound');
 const warningSoundReverse = document.getElementById('warning-sound-reverse');
+const warningSoundDeny = document.getElementById('warning-sound-deny');
 const loseSound = document.getElementById('lose-sound');
 const winSound = document.getElementById('win-sound');
 const newSound = document.getElementById('new-sound');
@@ -18,28 +19,10 @@ const AudioContextClass = window.AudioContext || window.webkitAudioContext;
 const audioContext = new AudioContextClass();
 let warningBufferPromise = null;
 let reversedWarningBuffer = null;
+let flagCounter = 0;
+let elapsedTime = 0;
 
 
-
-const getReversedWarningBuffer = (buffer) => {
-  if (!reversedWarningBuffer) {
-    reversedWarningBuffer = audioContext.createBuffer(
-      buffer.numberOfChannels,
-      buffer.length,
-      buffer.sampleRate
-    );
-
-    for (let channel = 0; channel < buffer.numberOfChannels; channel += 1) {
-      const original = buffer.getChannelData(channel);
-      const flipped = reversedWarningBuffer.getChannelData(channel);
-      for (let i = 0; i < original.length; i += 1) {
-        flipped[i] = original[original.length - 1 - i];
-      }
-    }
-  }
-
-  return reversedWarningBuffer;
-};
 
 // Plays the warning sound forwards when flagging, or reversed when unflagging.
 const playWarningSound = async (reverse) => {
@@ -71,6 +54,8 @@ const MINE_RATIO = 0.15;
 // shuffling their indices and tagging the first mineCount of them.
 const distributeMines = (wraps) => {
   const mineCount = Math.round(wraps.length * MINE_RATIO);
+  flagCounter = mineCount;
+  updateFlagField();
 
   const indices = wraps.map((_, index) => index);
   for (let i = indices.length - 1; i > 0; i -= 1) {
@@ -199,6 +184,8 @@ const triggerGameOver = () => {
 // A win happens when every non-mine bubble has been popped, or every mine
 // has been flagged (whichever comes first).
 const checkWinCondition = () => {
+  updateFlagField();
+
   const mineWraps = bubbleWraps.filter((wrap) => wrap.classList.contains('mine'));
 
   const allNonMinesRevealed = bubbleWraps.every((wrap) => {
@@ -257,12 +244,28 @@ const wireUpBubble = (wrap, index) => {
 
   const toggleFlag = () => {
     // Already popped bubbles can't be flagged or re-flagged.
-    if (bubble.checked) return;
+    if (bubble.checked) return false;
+
+    const isCurrentlyFlagged = wrap.classList.contains('flagged');
+
+    // Once the flag counter runs out, no more bubbles can be flagged
+    // (but existing flags can still be removed).
+    if (!isCurrentlyFlagged && flagCounter <= 0) {
+      const denySound = warningSoundDeny.cloneNode();
+      denySound.play();
+      return false;
+    }
+
     const isNowFlagged = wrap.classList.toggle('flagged');
     // Play forwards when flagging, reversed when unflagging.
     playWarningSound(!isNowFlagged);
-
+    if (isNowFlagged) {
+      flagCounter -= 1;
+    } else {
+      flagCounter += 1;
+    }
     checkWinCondition();
+    return true;
   };
 
   const startPress = (event) => {
@@ -272,6 +275,9 @@ const wireUpBubble = (wrap, index) => {
 
     isLongPress = false;
     pressTimer = setTimeout(() => {
+      // A long press always means the user intended to flag/unflag, not pop -
+      // so the upcoming click is swallowed even if the flag attempt was denied
+      // (e.g. no flags left). Otherwise they'd risk accidentally popping a mine.
       isLongPress = true;
       toggleFlag();
     }, LONG_PRESS_MS);
@@ -361,5 +367,14 @@ fieldSizeSelector.addEventListener('change', () => {
   const sound = newSound.cloneNode();
   sound.play();
 });
+
+const formatNumber = (num) => {
+  return num.toString().padStart(3, '0');
+};
+
+const updateFlagField = () => {
+  const flagCounterLabel = document.getElementById('flag-counter');
+  flagCounterLabel.textContent = formatNumber(flagCounter);
+};
 
 startNewGame();

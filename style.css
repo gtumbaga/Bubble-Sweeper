@@ -9,7 +9,7 @@ body {
 }
 
 .field-holder {
-    margin-top: 40px;
+    margin-top: 10px;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -370,4 +370,14 @@ body {
 
 .game-message.lose {
   color: #ef4444;
+}
+
+.data-holder {
+  font-weight: 700;
+  font-size: 20px;
+  color: #fff;
+  display: flex;
+  justify-content: space-between;
+  max-width: 400px;
+  margin: 0 auto;
 }
