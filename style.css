@@ -287,24 +287,86 @@ body {
 
 /* 8. Game over: once a mine is popped, every mine is revealed and the
    whole grid is locked so no further bubbles can be interacted with. */
-.bubblewrap-container.game-over {
+.bubblewrap-container.game-over,
+.bubblewrap-container.game-won {
   pointer-events: none;
 }
 
 .bubble-wrap.revealed-mine .bubble {
   outline: 3px solid #ef4444;
   outline-offset: 2px;
+  animation: mine-shake 0.5s ease-in-out;
+}
+
+@keyframes mine-shake {
+  0%, 100% {
+    transform: translateX(0) rotate(0deg);
+  }
+  10% {
+    transform: translateX(-4px) rotate(-6deg);
+  }
+  20% {
+    transform: translateX(4px) rotate(6deg);
+  }
+  30% {
+    transform: translateX(-4px) rotate(-5deg);
+  }
+  40% {
+    transform: translateX(4px) rotate(5deg);
+  }
+  50% {
+    transform: translateX(-3px) rotate(-3deg);
+  }
+  60% {
+    transform: translateX(3px) rotate(3deg);
+  }
+  70% {
+    transform: translateX(-2px) rotate(-2deg);
+  }
+  80% {
+    transform: translateX(2px) rotate(2deg);
+  }
+  90% {
+    transform: translateX(-1px);
+  }
 }
 
 .bubble-wrap.revealed-mine::after {
-  content: "\1F4A3"; /* 💣 */
+  /* 💣 */
+  content: "\1F4A3";
+  /* 💥 */
+  /*content: "\1F4A5";*/
   position: absolute;
   inset: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 22px;
+  font-size: 60px;
   line-height: 1;
   z-index: 4;
   pointer-events: none;
+}
+
+/* Winning is a happier occasion: mines revealed after a win are tinted
+   green instead of the alarming red used when a mine is actually popped. */
+.bubblewrap-container.game-won .bubble-wrap.revealed-mine .bubble {
+  outline-color: #4ade80;
+}
+
+/* 9. Status banner shown once the game ends. */
+.game-message {
+  text-align: center;
+  font-family: system-ui, sans-serif;
+  font-weight: 700;
+  font-size: 1.25rem;
+  min-height: 1.5em;
+  margin-top: 12px;
+}
+
+.game-message.win {
+  color: #4ade80;
+}
+
+.game-message.lose {
+  color: #ef4444;
 }

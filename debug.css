@@ -3,10 +3,11 @@
 .bubble-wrap.mine .bubble {
   outline: 3px solid #ef4444;
   outline-offset: 2px;
+  animation: mine-shake 0.5s ease-in-out;
 }
 
 .bubble-wrap.mine::after {
-  content: "\1F4A3"; /* 💣 */
+  content: "\1F4A5"; /* 💥 */
   position: absolute;
   inset: 0;
   display: flex;

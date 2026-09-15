@@ -3,6 +3,8 @@ const multiPopSound = document.getElementById('multi-pop-sound');
 const warningSound = document.getElementById('warning-sound');
 const warningSoundReverse = document.getElementById('warning-sound-reverse');
 const loseSound = document.getElementById('lose-sound');
+const winSound = document.getElementById('win-sound');
+const newSound = document.getElementById('new-sound');
 
 
 
@@ -170,6 +172,13 @@ const revealCascade = (wraps, size, startIndex) => {
     sound.play();
   }
 };
+const container = document.querySelector('.bubblewrap-container');
+const gameMessage = document.getElementById('game-message');
+
+const setGameMessage = (text, variant) => {
+  gameMessage.textContent = text;
+  gameMessage.className = variant ? `game-message ${variant}` : 'game-message';
+};
 
 // Ends the game after a mine is popped: plays the lose sound, reveals every
 // mine on the board, and locks the grid so no more bubbles can be interacted with.
@@ -184,9 +193,42 @@ const triggerGameOver = () => {
   });
 
   container.classList.add('game-over');
+  setGameMessage('Game Over! You popped a mine.', 'lose');
 };
 
-const container = document.querySelector('.bubblewrap-container');
+// A win happens when every non-mine bubble has been popped, or every mine
+// has been flagged (whichever comes first).
+const checkWinCondition = () => {
+  const mineWraps = bubbleWraps.filter((wrap) => wrap.classList.contains('mine'));
+
+  const allNonMinesRevealed = bubbleWraps.every((wrap) => {
+    if (wrap.classList.contains('mine')) return true;
+    return wrap.querySelector('.bubble').checked;
+  });
+
+  const allMinesFlagged =
+    mineWraps.length > 0 && mineWraps.every((wrap) => wrap.classList.contains('flagged'));
+
+  if (allNonMinesRevealed || allMinesFlagged) {
+    triggerWin();
+  }
+};
+
+// Celebrates the win: reveals any still-hidden mines (tinted green, not red,
+// since nothing exploded) and locks the grid from further interaction.
+const triggerWin = () => {
+  const sound = winSound.cloneNode();
+  sound.play();
+
+  bubbleWraps.forEach((wrap) => {
+    if (wrap.classList.contains('mine')) {
+      wrap.classList.add('revealed-mine');
+    }
+  });
+
+  container.classList.add('game-won');
+  setGameMessage('You Win!', 'win');
+};
 
 const createBubbleWrap = () => {
   const wrap = document.createElement('label');
@@ -220,6 +262,7 @@ const wireUpBubble = (wrap, index) => {
     // Play forwards when flagging, reversed when unflagging.
     playWarningSound(!isNowFlagged);
 
+    checkWinCondition();
   };
 
   const startPress = (event) => {
@@ -275,6 +318,7 @@ const wireUpBubble = (wrap, index) => {
       sound.play();
 
       revealCascade(bubbleWraps, fieldSize, index);
+      checkWinCondition();
     }
   });
 };
@@ -284,7 +328,8 @@ const bubbleWraps = [];
 const startNewGame = () => {
   // Clear out any bubbles from a previous game.
   container.innerHTML = '';
-  container.classList.remove('game-over');
+  container.classList.remove('game-over', 'game-won');
+  setGameMessage('');
   bubbleWraps.length = 0;
 
   // Let the CSS grid know how many columns/rows to lay out.
@@ -302,13 +347,19 @@ const startNewGame = () => {
 };
 
 const newGameButton = document.getElementById('new-game-button');
-newGameButton.addEventListener('click', startNewGame);
+newGameButton.addEventListener('click', () => {
+  startNewGame();
+  const sound = newSound.cloneNode();
+  sound.play();
+});
 
 const fieldSizeSelector = document.querySelector('.field-size-selector');
 fieldSizeSelector.value = String(fieldSize);
 fieldSizeSelector.addEventListener('change', () => {
   fieldSize = parseInt(fieldSizeSelector.value, 10);
   startNewGame();
+  const sound = newSound.cloneNode();
+  sound.play();
 });
 
 startNewGame();
