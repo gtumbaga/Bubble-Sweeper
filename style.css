@@ -9,10 +9,13 @@ body {
 }
 
 .field-holder {
-    margin-top: 10px;
+  width: 380px;
+  height: 380px;
+  margin: 10px auto 0;
   display: flex;
   justify-content: center;
   align-items: center;
+  overflow: hidden;
 }
 
 .controls {
@@ -20,6 +23,55 @@ body {
   justify-content: center;
   align-items: center;
   gap: 10px;
+}
+
+.field-size-stepper {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.stepper-btn {
+  width: 28px;
+  height: 28px;
+  border: none;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.1);
+  color: #f1f5f9;
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s ease;
+}
+
+.stepper-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.stepper-btn:active {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.field-size-input {
+  width: 48px;
+  height: 28px;
+  text-align: center;
+  border: none;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.1);
+  color: #f1f5f9;
+  font-size: 14px;
+  appearance: textfield;
+  -moz-appearance: textfield;
+}
+
+.field-size-input::-webkit-outer-spin-button,
+.field-size-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
 }
 
 /* 1. Create the grid layout for the sheet */
@@ -32,6 +84,8 @@ body {
   background: rgba(255, 255, 255, 0.1);
   border-radius: 12px;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  /* Scaled down to fit .field-holder for larger field sizes; set in script.js */
+  transform-origin: center center;
 }
 
 /* Wraps each bubble + its remnant shards so they can be positioned together */

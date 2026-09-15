@@ -1,5 +1,7 @@
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bubble Sweeper</title>
     <link rel="stylesheet" href="style.css">
 </head>
@@ -17,12 +19,11 @@
     <!-- Bubbles are generated dynamically in script.js based on fieldSize -->
     <div class="controls">
         <button id="new-game-button">New Game</button>
-        <select class="field-size-selector">
-            <option value="5">5x5</option>
-            <option value="6">6x6</option>
-            <option value="7">7x7</option>
-            <option value="9">9x9</option>
-        </select>
+        <div class="field-size-stepper">
+            <button type="button" id="field-size-decrement" class="stepper-btn" aria-label="Decrease field size">&minus;</button>
+            <input type="number" id="field-size-input" class="field-size-input" value="6" min="3" max="20" step="1" aria-label="Field size">
+            <button type="button" id="field-size-increment" class="stepper-btn" aria-label="Increase field size">+</button>
+        </div>
     </div>
     <div id="game-message" class="game-message"></div>
     <div class="data-holder">

@@ -142,6 +142,8 @@ const revealCascade = (wraps, size, startIndex) => {
     const cellBubble = wrap.querySelector('.bubble');
     if (!cellBubble.checked) additionalReveals += 1;
     cellBubble.checked = true;
+    // Marks the bubble as permanently popped so it can't be unchecked later.
+    wrap.classList.add('popped');
 
     if (wrap.dataset.count !== '0') continue; // numbered cell: reveal but don't expand
 
@@ -159,6 +161,23 @@ const revealCascade = (wraps, size, startIndex) => {
 };
 const container = document.querySelector('.bubblewrap-container');
 const gameMessage = document.getElementById('game-message');
+const FIELD_HOLDER_SIZE = 380;
+
+// Scales the (possibly much larger) grid down so it always visually fits
+// within a 380x380 box, regardless of field size, while staying centered
+// (the flex-centering on .field-holder plus a center transform-origin keep
+// it positioned correctly as it shrinks).
+const fitContainerToHolder = () => {
+  container.style.transform = 'none';
+  const naturalWidth = container.offsetWidth;
+  const naturalHeight = container.offsetHeight;
+  const scale = Math.min(
+    FIELD_HOLDER_SIZE / naturalWidth,
+    FIELD_HOLDER_SIZE / naturalHeight,
+    1
+  );
+  container.style.transform = `scale(${scale})`;
+};
 
 const setGameMessage = (text, variant) => {
   gameMessage.textContent = text;
@@ -295,6 +314,16 @@ const wireUpBubble = (wrap, index) => {
   // Right click also flags/unflags the bubble, same as a long press.
   wrap.addEventListener('contextmenu', (event) => {
     event.preventDefault();
+
+    // On touch devices, holding a bubble long enough fires our own
+    // timer-based long-press toggle first, then the browser follows up
+    // with its own synthetic contextmenu event for that same gesture. If
+    // we didn't skip it here, that one press would flag and then
+    // immediately un-flag the bubble. A true right-click never triggers
+    // the timer (see the button check in startPress), so isLongPress is
+    // only ever true here because of that touch case.
+    if (isLongPress) return;
+
     toggleFlag();
   });
 
@@ -306,6 +335,12 @@ const wireUpBubble = (wrap, index) => {
       return;
     }
 
+    if (wrap.classList.contains('popped')) {
+      // Once popped, a bubble is permanently revealed - block un-popping it.
+      event.preventDefault();
+      return;
+    }
+
     if (wrap.classList.contains('flagged')) {
       // Flagged bubbles must be unflagged (long press) before they can be popped.
       event.preventDefault();
@@ -314,6 +349,8 @@ const wireUpBubble = (wrap, index) => {
 
   bubble.addEventListener('change', () => {
     if (bubble.checked) {
+      wrap.classList.add('popped');
+
       if (wrap.classList.contains('mine')) {
         triggerGameOver();
         return;
@@ -350,6 +387,7 @@ const startNewGame = () => {
 
   distributeMines(bubbleWraps);
   labelMineCounts(bubbleWraps, fieldSize);
+  fitContainerToHolder();
 };
 
 const newGameButton = document.getElementById('new-game-button');
@@ -359,13 +397,34 @@ newGameButton.addEventListener('click', () => {
   sound.play();
 });
 
-const fieldSizeSelector = document.querySelector('.field-size-selector');
-fieldSizeSelector.value = String(fieldSize);
-fieldSizeSelector.addEventListener('change', () => {
-  fieldSize = parseInt(fieldSizeSelector.value, 10);
+const fieldSizeInput = document.getElementById('field-size-input');
+const fieldSizeDecrement = document.getElementById('field-size-decrement');
+const fieldSizeIncrement = document.getElementById('field-size-increment');
+const FIELD_SIZE_MIN = parseInt(fieldSizeInput.min, 10);
+const FIELD_SIZE_MAX = parseInt(fieldSizeInput.max, 10);
+
+fieldSizeInput.value = String(fieldSize);
+
+const applyFieldSize = (value) => {
+  const clamped = Math.min(FIELD_SIZE_MAX, Math.max(FIELD_SIZE_MIN, value));
+  fieldSizeInput.value = String(clamped);
+  fieldSize = clamped;
   startNewGame();
   const sound = newSound.cloneNode();
   sound.play();
+};
+
+fieldSizeInput.addEventListener('change', () => {
+  const parsed = parseInt(fieldSizeInput.value, 10);
+  applyFieldSize(Number.isNaN(parsed) ? fieldSize : parsed);
+});
+
+fieldSizeDecrement.addEventListener('click', () => {
+  applyFieldSize(parseInt(fieldSizeInput.value, 10) - 1);
+});
+
+fieldSizeIncrement.addEventListener('click', () => {
+  applyFieldSize(parseInt(fieldSizeInput.value, 10) + 1);
 });
 
 const formatNumber = (num) => {
