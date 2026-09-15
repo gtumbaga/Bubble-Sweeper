@@ -7,6 +7,9 @@ const loseSound = document.getElementById('lose-sound');
 const winSound = document.getElementById('win-sound');
 const newSound = document.getElementById('new-sound');
 
+let fieldSize = 5;
+const MINE_RATIO = 0.15;
+
 
 
 const LONG_PRESS_MS = 300;
@@ -46,9 +49,6 @@ if (params.get('debug') === '1') {
   debugStyles.href = 'debug.css';
   document.head.appendChild(debugStyles);
 }
-
-let fieldSize = 6;
-const MINE_RATIO = 0.15;
 
 // Randomly marks a subset of the already-created bubbles as mines by
 // shuffling their indices and tagging the first mineCount of them.
@@ -197,7 +197,7 @@ const triggerGameOver = () => {
   });
 
   container.classList.add('game-over');
-  setGameMessage('Game Over! You popped a mine.', 'lose');
+  setGameMessage('Game Over! You popped a bomb!', 'lose');
 };
 
 // A win happens when every non-mine bubble has been popped, or every mine

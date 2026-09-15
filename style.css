@@ -427,8 +427,9 @@ body {
 }
 
 .data-holder {
-  font-weight: 700;
-  font-size: 20px;
+  /*font-weight: 700;*/
+  font-family: monospace;
+  font-size: 30px;
   color: #fff;
   display: flex;
   justify-content: space-between;
