@@ -9,38 +9,55 @@
     <!-- Preloaded so the pop sound plays instantly with no load-time delay -->
     <audio id="pop-sound" src="pop.mp3" preload="auto"></audio>
     <audio id="multi-pop-sound" src="multipop.mp3" preload="auto"></audio>
-    <audio id="warning-sound" src="warning.mp3" preload="auto"></audio>
-    <audio id="warning-sound-reverse" src="warning-reversed.mp3" preload="auto"></audio>
+    <audio id="warning-sound" src="warning2.mp3" preload="auto"></audio>
+    <audio id="warning-sound-reverse" src="warning-reversed2.mp3" preload="auto"></audio>
     <audio id="warning-sound-deny" src="warning-denied.mp3" preload="auto"></audio>
     <audio id="lose-sound" src="lose.mp3" preload="auto"></audio>
     <audio id="win-sound" src="winner.mp3" preload="auto"></audio>
     <audio id="new-sound" src="new.mp3" preload="auto"></audio>
-    <audio id="bg-music" src="bg-music.mp3" preload="auto" loop></audio>
+    <!-- Background music (bgm-full.wav: intro immediately followed by the
+         loop section, pre-trimmed and concatenated for a gapless loop) is
+         loaded and scheduled via the Web Audio API in script.js instead of
+         an <audio> element - see script.js for details. -->
+
+    <!-- Shown first so the game's first user interaction (the Start button)
+         can satisfy the browser's autoplay-gesture requirement for bg-music. -->
+    <div id="welcome-screen" class="welcome-screen">
+        <h1>Bubble Sweeper</h1>
+        <p>Pop every safe bubble, flag every bomb, and don't get caught in the pop!</p>
+        <button id="start-game-button">Start Game</button>
+    </div>
 
     <!-- Bubbles are generated dynamically in script.js based on fieldSize -->
-    <div class="controls">
-        <div>
-            <button id="new-game-button">New Game</button>
-        </div>
-        <div>
-            <div class="field-size-stepper">
-                <button type="button" id="field-size-decrement" class="stepper-btn" aria-label="Decrease field size">&minus;</button>
-                <input type="number" id="field-size-input" class="field-size-input" value="6" min="3" max="20" step="1" aria-label="Field size">
-                <button type="button" id="field-size-increment" class="stepper-btn" aria-label="Increase field size">+</button>
+    <div id="game-container" class="game-container hidden">
+        <div class="controls">
+            <div>
+                <div class="field-size-stepper">
+                    <button type="button" id="field-size-decrement" class="stepper-btn" aria-label="Decrease field size">&minus;</button>
+                    <input type="number" id="field-size-input" class="field-size-input" value="6" min="3" max="20" step="1" aria-label="Field size">
+                    <button type="button" id="field-size-increment" class="stepper-btn" aria-label="Increase field size">+</button>
+                </div>
+            </div>
+            <div>
+                <button id="new-game-button">New Game</button>
+            </div>
+            <div class="audio-controls">
+                <input type="checkbox" id="mute-music" aria-label="Mute music" />
+                <input type="checkbox" id="mute-audio" aria-label="Mute audio" />
             </div>
         </div>
-        <div class="audio-controls">
-            <input type="checkbox" id="mute-music" aria-label="Mute music" />
-            <input type="checkbox" id="mute-audio" aria-label="Mute audio" />
+        <div id="game-message" class="game-message"></div>
+        <div class="data-holder">
+            <div class="col">
+                <div class="digital-display" id="flag-counter">000</div><i class="flag-icon"></i>
+            </div>
+            <div class="col">
+                <i class="timer-icon"></i><div class="digital-display" id="elapsed-time">000</div>
+            </div>
         </div>
-    </div>
-    <div id="game-message" class="game-message"></div>
-    <div class="data-holder">
-        <div id="flag-counter">000</div>
-        <div id="elapsed-time">000</div>
-    </div>
-    <div class="field-holder">
-        <div class="bubblewrap-container"></div>
+        <div class="field-holder">
+            <div class="bubblewrap-container"></div>
+        </div>
     </div>
 
     <script src="script.js"></script>

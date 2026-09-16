@@ -6,7 +6,8 @@ const warningSoundDeny = document.getElementById('warning-sound-deny');
 const loseSound = document.getElementById('lose-sound');
 const winSound = document.getElementById('win-sound');
 const newSound = document.getElementById('new-sound');
-const bgMusic = document.getElementById('bg-music');
+
+winSound.volume = 0.55;
 
 let fieldSize = 5;
 const MINE_RATIO = 0.12;
@@ -39,16 +40,83 @@ const playSound = (audioElement) => {
   sound.play();
 };
 
-// Starts (or restarts) the looping background music from the beginning.
-// Ignored failures (e.g. blocked autoplay before any user gesture) are
-// swallowed since the very first startNewGame() call runs on page load.
-const startMusic = () => {
-  bgMusic.currentTime = 0;
-  bgMusic.play().catch(() => {});
+// --- Seamless background music (single combined track, native loop points) ---
+// bgm-intro.mp3 and bgm-loop.mp3 used to be separate files, each with its own
+// MP3 encoder delay/padding silence (visible in their iTunSMPB metadata) that
+// browsers' decodeAudioData() doesn't strip - that hidden silence was the
+// real source of the audible gap, even with sample-accurate scheduling
+// between two sources. bgm-full.wav is a single, pre-trimmed, losslessly
+// concatenated file (intro immediately followed by the loop section, no
+// codec artifacts in between) so one AudioBufferSourceNode can just loop
+// natively between two points within it - no gap, no scheduling math.
+const MUSIC_VOLUME = 0.75;
+const musicGain = audioContext.createGain();
+musicGain.connect(audioContext.destination);
+musicGain.gain.value = MUSIC_VOLUME;
+
+// Exact loop boundaries within bgm-full.wav, derived from the song's own
+// tempo and structure (2 bars of intro, 16 bars of loop, at 98 BPM) rather
+// than a fixed sample count - this is sample-rate independent, so it keeps
+// working correctly even if bgm-full.wav gets re-exported at a different
+// sample rate or bit depth. It only breaks if the musical structure itself
+// changes (extra bars, added lead-in silence, a different tempo, etc).
+const SONG_BPM = 98;
+const BEATS_PER_BAR = 4;
+const SECONDS_PER_BAR = (60 / SONG_BPM) * BEATS_PER_BAR;
+const INTRO_BARS = 2;
+const TOTAL_BARS = 18; // 2 bars intro + 16 bars loop
+const LOOP_START_SECONDS = INTRO_BARS * SECONDS_PER_BAR;
+const LOOP_END_SECONDS = TOTAL_BARS * SECONDS_PER_BAR;
+
+let musicBuffer = null;
+let musicSource = null;
+
+const musicBufferPromise = fetch('bgm-full-exported.wav')
+  .then((response) => response.arrayBuffer())
+  .then((arrayBuffer) => audioContext.decodeAudioData(arrayBuffer))
+  .then((buffer) => {
+    musicBuffer = buffer;
+  });
+
+// Stops and disconnects the currently-playing music source, if any, so a
+// new game can start fresh (buffer sources are one-shot - once stopped they
+// can't be restarted, a new source node has to be created each time).
+const stopMusicSource = () => {
+  if (!musicSource) return;
+  try {
+    musicSource.stop();
+  } catch (error) {
+    // Already stopped/ended - nothing to do.
+  }
+  musicSource.disconnect();
+  musicSource = null;
+};
+
+// Starts (or restarts) the music from the very beginning (the intro), then
+// loops forever between the end of the intro and the end of the file -
+// natively, within a single buffer, so there's no gap or seam. Ignored
+// failures (e.g. blocked autoplay before any user gesture) are swallowed
+// since the very first startNewGame() call runs on page load.
+const startMusic = async () => {
+  stopMusicSource();
+  await musicBufferPromise;
+
+  // Autoplay policies can leave the context suspended until a user gesture.
+  if (audioContext.state === 'suspended') {
+    await audioContext.resume().catch(() => {});
+  }
+
+  musicSource = audioContext.createBufferSource();
+  musicSource.buffer = musicBuffer;
+  musicSource.loop = true;
+  musicSource.loopStart = LOOP_START_SECONDS;
+  musicSource.loopEnd = LOOP_END_SECONDS;
+  musicSource.connect(musicGain);
+  musicSource.start();
 };
 
 const stopMusic = () => {
-  bgMusic.pause();
+  stopMusicSource();
 };
 
 
@@ -248,22 +316,16 @@ const triggerGameOver = () => {
   setGameMessage('Game Over! You popped a bomb!', 'lose');
 };
 
-// A win happens when every non-mine bubble has been popped, or every mine
-// has been flagged (whichever comes first).
+// A win happens when every non-mine bubble has been popped.
 const checkWinCondition = () => {
   updateFlagField();
-
-  const mineWraps = bubbleWraps.filter((wrap) => wrap.classList.contains('mine'));
 
   const allNonMinesRevealed = bubbleWraps.every((wrap) => {
     if (wrap.classList.contains('mine')) return true;
     return wrap.querySelector('.bubble').checked;
   });
 
-  const allMinesFlagged =
-    mineWraps.length > 0 && mineWraps.every((wrap) => wrap.classList.contains('flagged'));
-
-  if (allNonMinesRevealed || allMinesFlagged) {
+  if (allNonMinesRevealed) {
     triggerWin();
   }
 };
@@ -312,6 +374,10 @@ const wireUpBubble = (wrap, index) => {
   let isLongPress = false;
 
   const toggleFlag = () => {
+    // A flag attempt also counts as the first move of the game, just like a
+    // click does - so make sure the timer/music start here too.
+    startTimer();
+
     // Already popped bubbles can't be flagged or re-flagged.
     if (bubble.checked) return false;
 
@@ -451,13 +517,13 @@ const startNewGame = () => {
   distributeMines(bubbleWraps);
   labelMineCounts(bubbleWraps, fieldSize);
   fitContainerToHolder();
-  startMusic();
 };
 
 const newGameButton = document.getElementById('new-game-button');
 newGameButton.addEventListener('click', () => {
   startNewGame();
   playSound(newSound);
+  stopMusic();
 });
 
 const fieldSizeInput = document.getElementById('field-size-input');
@@ -499,9 +565,9 @@ muteCheckbox.addEventListener('change', () => {
 });
 
 const muteMusicCheckbox = document.getElementById('mute-music');
-bgMusic.muted = muteMusicCheckbox.checked;
+musicGain.gain.value = muteMusicCheckbox.checked ? 0 : MUSIC_VOLUME;
 muteMusicCheckbox.addEventListener('change', () => {
-  bgMusic.muted = muteMusicCheckbox.checked;
+  musicGain.gain.value = muteMusicCheckbox.checked ? 0 : MUSIC_VOLUME;
 });
 
 const formatNumber = (num) => {
@@ -525,6 +591,7 @@ const startTimer = () => {
   if (shouldBeTiming) return;
 
   shouldBeTiming = true;
+  startMusic();
   timerInterval = setInterval(() => {
     if (!shouldBeTiming) {
       clearInterval(timerInterval);
@@ -540,4 +607,15 @@ const stopTimer = () => {
   clearInterval(timerInterval);
 };
 
-startNewGame();
+// The game only starts once the player clicks "Start Game" on the welcome
+// screen - this both hides the field until then and, crucially, gives us a
+// genuine user gesture so the browser allows bg-music to autoplay.
+const welcomeScreen = document.getElementById('welcome-screen');
+const gameContainer = document.getElementById('game-container');
+const startGameButton = document.getElementById('start-game-button');
+
+startGameButton.addEventListener('click', () => {
+  welcomeScreen.classList.add('hidden');
+  gameContainer.classList.remove('hidden');
+  startNewGame();
+});
