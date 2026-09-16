@@ -27,6 +27,7 @@ let reversedWarningBuffer = null;
 let flagCounter = 0;
 let elapsedTime = 0;
 let shouldBeTiming = false;
+let isFirstClick = true;
 
 
 
@@ -71,9 +72,36 @@ const distributeMines = (wraps) => {
   });
 };
 
+// Called when the player's very first click of the game lands on a mine.
+// Rather than ending the game immediately, the mine is moved to a random
+// other (currently non-mine) bubble, and the neighbor-count labels are
+// recalculated so the board stays consistent. This guarantees the first
+// click is always safe.
+const relocateMine = (wraps, size, clickedWrap) => {
+  clickedWrap.classList.remove('mine');
+
+  const candidates = wraps.filter(
+    (wrap) => wrap !== clickedWrap && !wrap.classList.contains('mine')
+  );
+  if (candidates.length > 0) {
+    const newMineWrap = candidates[Math.floor(Math.random() * candidates.length)];
+    newMineWrap.classList.add('mine');
+  }
+
+  labelMineCounts(wraps, size);
+};
+
 // For every non-mine bubble, count how many of its 8 neighbors are mines
-// and render that count as a label (shown once the bubble is popped).
+// and render that count as a label (shown once the bubble is popped). Safe
+// to call more than once (e.g. after relocateMine) - any labels/counts from
+// a previous call are cleared first.
 const labelMineCounts = (wraps, size) => {
+  wraps.forEach((wrap) => {
+    const existingLabel = wrap.querySelector('.count');
+    if (existingLabel) existingLabel.remove();
+    delete wrap.dataset.count;
+  });
+
   const isMine = (row, col) => {
     if (row < 0 || row >= size || col < 0 || col >= size) return false;
     return wraps[row * size + col].classList.contains('mine');
@@ -359,6 +387,15 @@ const wireUpBubble = (wrap, index) => {
     if (bubble.checked) {
       wrap.classList.add('popped');
 
+      // The first click of the game is always guaranteed safe: if it landed
+      // on a mine, relocate that mine elsewhere before checking.
+      if (isFirstClick) {
+        isFirstClick = false;
+        if (wrap.classList.contains('mine')) {
+          relocateMine(bubbleWraps, fieldSize, wrap);
+        }
+      }
+
       if (wrap.classList.contains('mine')) {
         triggerGameOver();
         return;
@@ -380,6 +417,7 @@ const startNewGame = () => {
   shouldBeTiming = false;
   elapsedTime = 0;
   updateTimerField();
+  isFirstClick = true;
 
   // Clear out any bubbles from a previous game.
   container.innerHTML = '';
