@@ -6,6 +6,7 @@ const warningSoundDeny = document.getElementById('warning-sound-deny');
 const loseSound = document.getElementById('lose-sound');
 const winSound = document.getElementById('win-sound');
 const newSound = document.getElementById('new-sound');
+const bgMusic = document.getElementById('bg-music');
 
 let fieldSize = 5;
 const MINE_RATIO = 0.12;
@@ -28,21 +29,37 @@ let flagCounter = 0;
 let elapsedTime = 0;
 let shouldBeTiming = false;
 let isFirstClick = true;
+let isMuted = false;
+
+// Central place all one-shot sound effects go through, so muting can be
+// enforced in a single spot instead of guarding every call site.
+const playSound = (audioElement) => {
+  if (isMuted) return;
+  const sound = audioElement.cloneNode();
+  sound.play();
+};
+
+// Starts (or restarts) the looping background music from the beginning.
+// Ignored failures (e.g. blocked autoplay before any user gesture) are
+// swallowed since the very first startNewGame() call runs on page load.
+const startMusic = () => {
+  bgMusic.currentTime = 0;
+  bgMusic.play().catch(() => {});
+};
+
+const stopMusic = () => {
+  bgMusic.pause();
+};
 
 
 
 // Plays the warning sound forwards when flagging, or reversed when unflagging.
 const playWarningSound = async (reverse) => {
-
   if (!reverse) {
-    const sound = warningSound.cloneNode();
-    sound.play();
+    playSound(warningSound);
     return;
   }
-  const reversed = warningSoundReverse.cloneNode();
-  reversed.play();
-  return;
-
+  playSound(warningSoundReverse);
 };
 
 // Loads debug.css (which visually flags mines) when ?debug=1 is in the URL.
@@ -186,8 +203,7 @@ const revealCascade = (wraps, size, startIndex) => {
   // If the cascade spread past the clicked bubble, play a distinct sound
   // for revealing multiple bubbles at once.
   if (additionalReveals > 0) {
-    const sound = multiPopSound.cloneNode();
-    sound.play();
+    playSound(multiPopSound);
   }
 };
 const container = document.querySelector('.bubblewrap-container');
@@ -219,8 +235,8 @@ const setGameMessage = (text, variant) => {
 // mine on the board, and locks the grid so no more bubbles can be interacted with.
 const triggerGameOver = () => {
   stopTimer();
-  const sound = loseSound.cloneNode();
-  sound.play();
+  stopMusic();
+  playSound(loseSound);
 
   bubbleWraps.forEach((wrap) => {
     if (wrap.classList.contains('mine')) {
@@ -255,10 +271,10 @@ const checkWinCondition = () => {
 // Celebrates the win: reveals any still-hidden mines (tinted green, not red,
 // since nothing exploded) and locks the grid from further interaction.
 const triggerWin = () => {
-  const sound = winSound.cloneNode();
-  sound.play();
+  playSound(winSound);
 
   stopTimer();
+  stopMusic();
 
   bubbleWraps.forEach((wrap) => {
     if (wrap.classList.contains('mine')) {
@@ -304,8 +320,7 @@ const wireUpBubble = (wrap, index) => {
     // Once the flag counter runs out, no more bubbles can be flagged
     // (but existing flags can still be removed).
     if (!isCurrentlyFlagged && flagCounter <= 0) {
-      const denySound = warningSoundDeny.cloneNode();
-      denySound.play();
+      playSound(warningSoundDeny);
       return false;
     }
 
@@ -401,9 +416,7 @@ const wireUpBubble = (wrap, index) => {
         return;
       }
 
-      // Clone the node so overlapping pops (rapid clicks) can all play at once
-      const sound = popSound.cloneNode();
-      sound.play();
+      playSound(popSound);
 
       revealCascade(bubbleWraps, fieldSize, index);
       checkWinCondition();
@@ -438,13 +451,13 @@ const startNewGame = () => {
   distributeMines(bubbleWraps);
   labelMineCounts(bubbleWraps, fieldSize);
   fitContainerToHolder();
+  startMusic();
 };
 
 const newGameButton = document.getElementById('new-game-button');
 newGameButton.addEventListener('click', () => {
   startNewGame();
-  const sound = newSound.cloneNode();
-  sound.play();
+  playSound(newSound);
 });
 
 const fieldSizeInput = document.getElementById('field-size-input');
@@ -460,8 +473,7 @@ const applyFieldSize = (value) => {
   fieldSizeInput.value = String(clamped);
   fieldSize = clamped;
   startNewGame();
-  const sound = newSound.cloneNode();
-  sound.play();
+  playSound(newSound);
 };
 
 fieldSizeInput.addEventListener('change', () => {
@@ -475,6 +487,21 @@ fieldSizeDecrement.addEventListener('click', () => {
 
 fieldSizeIncrement.addEventListener('click', () => {
   applyFieldSize(parseInt(fieldSizeInput.value, 10) + 1);
+});
+
+const muteCheckbox = document.getElementById('mute-audio');
+isMuted = muteCheckbox.checked;
+muteCheckbox.addEventListener('change', () => {
+  isMuted = muteCheckbox.checked;
+  if (!isMuted) {
+    playSound(newSound);
+  }
+});
+
+const muteMusicCheckbox = document.getElementById('mute-music');
+bgMusic.muted = muteMusicCheckbox.checked;
+muteMusicCheckbox.addEventListener('change', () => {
+  bgMusic.muted = muteMusicCheckbox.checked;
 });
 
 const formatNumber = (num) => {

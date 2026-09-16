@@ -15,14 +15,23 @@
     <audio id="lose-sound" src="lose.mp3" preload="auto"></audio>
     <audio id="win-sound" src="winner.mp3" preload="auto"></audio>
     <audio id="new-sound" src="new.mp3" preload="auto"></audio>
+    <audio id="bg-music" src="bg-music.mp3" preload="auto" loop></audio>
 
     <!-- Bubbles are generated dynamically in script.js based on fieldSize -->
     <div class="controls">
-        <button id="new-game-button">New Game</button>
-        <div class="field-size-stepper">
-            <button type="button" id="field-size-decrement" class="stepper-btn" aria-label="Decrease field size">&minus;</button>
-            <input type="number" id="field-size-input" class="field-size-input" value="6" min="3" max="20" step="1" aria-label="Field size">
-            <button type="button" id="field-size-increment" class="stepper-btn" aria-label="Increase field size">+</button>
+        <div>
+            <button id="new-game-button">New Game</button>
+        </div>
+        <div>
+            <div class="field-size-stepper">
+                <button type="button" id="field-size-decrement" class="stepper-btn" aria-label="Decrease field size">&minus;</button>
+                <input type="number" id="field-size-input" class="field-size-input" value="6" min="3" max="20" step="1" aria-label="Field size">
+                <button type="button" id="field-size-increment" class="stepper-btn" aria-label="Increase field size">+</button>
+            </div>
+        </div>
+        <div class="audio-controls">
+            <input type="checkbox" id="mute-music" aria-label="Mute music" />
+            <input type="checkbox" id="mute-audio" aria-label="Mute audio" />
         </div>
     </div>
     <div id="game-message" class="game-message"></div>
