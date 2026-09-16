@@ -71,7 +71,7 @@ const LOOP_END_SECONDS = TOTAL_BARS * SECONDS_PER_BAR;
 let musicBuffer = null;
 let musicSource = null;
 
-const musicBufferPromise = fetch('bgm-full-exported.wav')
+const musicBufferPromise = fetch('bgm-full.mp3')
   .then((response) => response.arrayBuffer())
   .then((arrayBuffer) => audioContext.decodeAudioData(arrayBuffer))
   .then((buffer) => {
