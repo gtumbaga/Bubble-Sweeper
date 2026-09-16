@@ -8,7 +8,9 @@ const winSound = document.getElementById('win-sound');
 const newSound = document.getElementById('new-sound');
 
 let fieldSize = 5;
-const MINE_RATIO = 0.15;
+const MINE_RATIO = 0.12;
+
+let timerInterval = null;
 
 
 
@@ -24,6 +26,7 @@ let warningBufferPromise = null;
 let reversedWarningBuffer = null;
 let flagCounter = 0;
 let elapsedTime = 0;
+let shouldBeTiming = false;
 
 
 
@@ -187,6 +190,7 @@ const setGameMessage = (text, variant) => {
 // Ends the game after a mine is popped: plays the lose sound, reveals every
 // mine on the board, and locks the grid so no more bubbles can be interacted with.
 const triggerGameOver = () => {
+  stopTimer();
   const sound = loseSound.cloneNode();
   sound.play();
 
@@ -225,6 +229,8 @@ const checkWinCondition = () => {
 const triggerWin = () => {
   const sound = winSound.cloneNode();
   sound.play();
+
+  stopTimer();
 
   bubbleWraps.forEach((wrap) => {
     if (wrap.classList.contains('mine')) {
@@ -328,6 +334,8 @@ const wireUpBubble = (wrap, index) => {
   });
 
   bubble.addEventListener('click', (event) => {
+    startTimer();
+
     if (isLongPress) {
       // The long press already toggled the flag; don't let this click pop it too.
       event.preventDefault();
@@ -369,6 +377,10 @@ const wireUpBubble = (wrap, index) => {
 const bubbleWraps = [];
 
 const startNewGame = () => {
+  shouldBeTiming = false;
+  elapsedTime = 0;
+  updateTimerField();
+
   // Clear out any bubbles from a previous game.
   container.innerHTML = '';
   container.classList.remove('game-over', 'game-won');
@@ -434,6 +446,33 @@ const formatNumber = (num) => {
 const updateFlagField = () => {
   const flagCounterLabel = document.getElementById('flag-counter');
   flagCounterLabel.textContent = formatNumber(flagCounter);
+};
+
+const updateTimerField = () => {
+  const timerLabel = document.getElementById('elapsed-time');
+  timerLabel.textContent = formatNumber(elapsedTime);
+};
+
+const startTimer = () => {
+  // Guard against multiple overlapping intervals: if the timer is already
+  // running (e.g. from an earlier click this game), don't start another one
+  // or reset the elapsed count back to 0.
+  if (shouldBeTiming) return;
+
+  shouldBeTiming = true;
+  timerInterval = setInterval(() => {
+    if (!shouldBeTiming) {
+      clearInterval(timerInterval);
+      return;
+    }
+    elapsedTime++;
+    updateTimerField();
+  }, 1000);
+};
+
+const stopTimer = () => {
+  shouldBeTiming = false;
+  clearInterval(timerInterval);
 };
 
 startNewGame();
