@@ -46,7 +46,7 @@ body {
   text-align: center;
   gap: 16px;
   padding: 24px;
-  font-family: system-ui, sans-serif;
+  font-family: Arial, sans-serif;
 }
 
 .rotate-overlay-icon {
@@ -73,7 +73,7 @@ body {
   max-width: 400px;
   margin: 0 auto;
   padding: 0;
-  font-family: system-ui, sans-serif;
+  font-family: Arial, sans-serif;
   /*text-shadow: 0 0 10px rgba(0, 0, 0, 0.5);*/
 
   background: #fff;
@@ -636,7 +636,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-family: system-ui, sans-serif;
+  font-family: Arial, sans-serif;
   font-weight: 700;
   font-size: 20px;
   /*text-shadow: 0 0 5px rgba(0, 0, 0, 0.5);*/
@@ -739,8 +739,10 @@ body {
 
 /* 9. Status banner shown once the game ends. */
 .game-message {
+  pointer-events: none;
+  touch-action: manipulation;
   text-align: center;
-  font-family: system-ui, sans-serif;
+  font-family: Arial, sans-serif;
   font-weight: 700;
   font-size: 24px;
   min-height: 1.5em;
@@ -788,6 +790,7 @@ body {
 
   .digital-display {
     pointer-events: none;
+    touch-action: manipulation;
     display: inline-block;
     background-color: #9ead86;
     position: relative;
