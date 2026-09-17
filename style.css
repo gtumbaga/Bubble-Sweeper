@@ -6,6 +6,12 @@ html, body {
      intersection of an element's touch-action and all of its ancestors', so
      setting it here covers descendants that don't set their own. */
   touch-action: manipulation;
+
+  /* ensure all text not selectable*/
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
 }
 
 body {
@@ -798,6 +804,12 @@ body {
       inset 2px 0 3px rgba(0, 0, 0, 0.3),
       inset -2px 0 3px rgba(0, 0, 0, 0.3);
     letter-spacing: 1px;
+
+    /* ensure all text not selectable*/
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
   }
 
   /* Same blinking yellow LED used to mark a flagged mine on the board. */
