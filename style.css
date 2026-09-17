@@ -5,9 +5,10 @@ body {
   /*display: flex;
   justify-content: center;
   align-items: center;*/
-  min-height: 100vh;
+  /*min-height: 100vh;*/
   margin: 0;
-  padding-top: 40px;
+  padding-top: 50px;
+  overflow: hidden;
 }
 
 .hidden {
@@ -307,11 +308,12 @@ body {
   grid-template-columns: repeat(var(--field-size, 5), 60px);
   gap: 10px;
   padding: 20px;
+  position: relative;
   /*background: rgba(255, 255, 255, 0.1);*/
   background: rgba(155, 200, 255, 0.4);
   border-radius: 12px;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-  /* Scaled down to fit .field-holder for larger field sizes; set in script.js */
+  /* Scaled down only when the sheet can't fit on screen; set in script.js */
   transform-origin: center center;
 }
 
@@ -660,7 +662,8 @@ body {
   width: 400px;
   left: 50%;
   margin-left: -200px;
-  top: 262px;
+  top: 50%;
+  margin-top: -45px;
   font-size: 60px;
   z-index: 999;
   text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);

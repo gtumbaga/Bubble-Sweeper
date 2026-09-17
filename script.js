@@ -275,23 +275,46 @@ const revealCascade = (wraps, size, startIndex) => {
   }
 };
 const container = document.querySelector('.bubblewrap-container');
+const fieldHolder = document.querySelector('.field-holder');
 const gameMessage = document.getElementById('game-message');
-const FIELD_HOLDER_SIZE = 380;
+const VIEWPORT_PADDING = 16;
 
-// Scales the (possibly much larger) grid down so it always visually fits
-// within a 380x380 box, regardless of field size, while staying centered
-// (the flex-centering on .field-holder plus a center transform-origin keep
-// it positioned correctly as it shrinks).
+// Lets the grid keep its natural size when it fits on screen, and only
+// scales it down when it would overflow the viewport. Negative margins
+// collapse the unscaled layout box to the visual size so the page doesn't
+// grow scrollbars from transform (which doesn't affect layout on its own).
 const fitContainerToHolder = () => {
   container.style.transform = 'none';
+  container.style.margin = '0';
+
   const naturalWidth = container.offsetWidth;
   const naturalHeight = container.offsetHeight;
+  if (!naturalWidth || !naturalHeight) return;
+
+  // const bodyPaddingTop = parseFloat(getComputedStyle(document.body).paddingTop) || 0;
+  const bodyPaddingTop = 40;
+  const holderTop = fieldHolder.getBoundingClientRect().top;
+  const availableWidth = Math.max(
+    1,
+    document.documentElement.clientWidth - VIEWPORT_PADDING * 2
+  );
+  const availableHeight = Math.max(
+    1,
+    document.documentElement.clientHeight - holderTop - bodyPaddingTop
+  );
   const scale = Math.min(
-    FIELD_HOLDER_SIZE / naturalWidth,
-    FIELD_HOLDER_SIZE / naturalHeight,
+    availableWidth / naturalWidth,
+    availableHeight / naturalHeight,
     1
   );
+
+  const visualWidth = naturalWidth * scale;
+  const visualHeight = naturalHeight * scale;
+
   container.style.transform = `scale(${scale})`;
+  container.style.margin = `${(visualHeight - naturalHeight) / 2}px ${(visualWidth - naturalWidth) / 2}px`;
+  fieldHolder.style.width = `${visualWidth}px`;
+  fieldHolder.style.height = `${visualHeight}px`;
 };
 
 const setGameMessage = (text, variant) => {
@@ -627,3 +650,5 @@ startGameButton.addEventListener('click', () => {
   gameContainer.classList.remove('hidden');
   startNewGame();
 });
+
+window.addEventListener('resize', fitContainerToHolder);
