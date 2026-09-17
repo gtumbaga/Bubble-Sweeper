@@ -787,6 +787,7 @@ body {
   }
 
   .digital-display {
+    pointer-events: none;
     display: inline-block;
     background-color: #9ead86;
     position: relative;
