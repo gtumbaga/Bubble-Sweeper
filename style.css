@@ -1,3 +1,13 @@
+html, body {
+  /* Disables the browser's double-tap-to-zoom gesture everywhere (while still
+     allowing pinch-zoom and panning), so double-tapping things like the
+     digital display can't zoom the page in. touch-action isn't inherited via
+     normal CSS cascade rules, but per spec the browser still applies the
+     intersection of an element's touch-action and all of its ancestors', so
+     setting it here covers descendants that don't set their own. */
+  touch-action: manipulation;
+}
+
 body {
   /*background-color: #1e293b;*/ /* Dark background to make bubbles stand out */
   background: url(./cardboard-bg2-compressed.jpg);
@@ -9,6 +19,39 @@ body {
   margin: 0;
   padding-top: 50px;
   overflow: hidden;
+}
+
+/* iOS gives web content (even installed PWAs) no way to truly lock screen
+   orientation - the Screen Orientation API's lock() and the manifest's
+   "orientation" member are both unsupported in WebKit. The manifest value
+   already locks orientation on Android/Chromium when installed; this overlay
+   is the cross-platform fallback that blocks play and asks the user to
+   rotate back to portrait whenever the viewport is in landscape. */
+.rotate-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: #1a2e1a;
+  color: #fff;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 16px;
+  padding: 24px;
+  font-family: system-ui, sans-serif;
+}
+
+.rotate-overlay-icon {
+  font-size: 64px;
+  transform: rotate(90deg);
+}
+
+@media screen and (orientation: landscape) {
+  .rotate-overlay {
+    display: flex;
+  }
 }
 
 .hidden {

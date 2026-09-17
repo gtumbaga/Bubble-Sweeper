@@ -15,6 +15,15 @@
     <meta name="apple-mobile-web-app-title" content="Bubble Sweeper">
 </head>
 <body>
+    <!-- iOS/WebKit can't truly lock orientation for web content (see the
+         comment near .rotate-overlay in style.css), so this overlay is shown
+         via a CSS orientation media query whenever the viewport is landscape,
+         blocking play until the user rotates back to portrait. -->
+    <div class="rotate-overlay" id="rotate-overlay">
+        <div class="rotate-overlay-icon">&#128241;</div>
+        <p>Please rotate your device back to portrait to keep playing.</p>
+    </div>
+
     <!-- Preloaded so the pop sound plays instantly with no load-time delay -->
     <audio id="pop-sound" src="pop.mp3" preload="auto"></audio>
     <audio id="multi-pop-sound" src="multipop.mp3" preload="auto"></audio>
