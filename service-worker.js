@@ -1,6 +1,6 @@
 // Bumping CACHE_NAME invalidates all previously cached assets and forces
 // a fresh download on the next load - do this whenever any cached file changes.
-const CACHE_NAME = 'bubble-sweeper-v1';
+const CACHE_NAME = 'bubble-sweeper-v2';
 
 const ASSETS_TO_CACHE = [
   './',
