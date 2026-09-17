@@ -359,11 +359,11 @@ const createBubbleWrap = () => {
 
   // Each bubble is wrapped with a few "shard" spans that become the
   // leftover popped-film remnants once the checkbox is checked.
-  for (let i = 0; i < SHARDS_PER_BUBBLE; i += 1) {
-    const shard = document.createElement('span');
-    shard.className = 'shard';
-    wrap.appendChild(shard);
-  }
+  // for (let i = 0; i < SHARDS_PER_BUBBLE; i += 1) {
+  //   const shard = document.createElement('span');
+  //   shard.className = 'shard';
+  //   wrap.appendChild(shard);
+  // }
 
   return wrap;
 };
@@ -513,6 +513,12 @@ const startNewGame = () => {
     wireUpBubble(wrap, i);
     bubbleWraps.push(wrap);
   }
+
+  ['tape1', 'tape2', 'tape3', 'tape4'].forEach((tapeClass) => {
+    const tape = document.createElement('div');
+    tape.className = `tape ${tapeClass}`;
+    container.appendChild(tape);
+  });
 
   distributeMines(bubbleWraps);
   labelMineCounts(bubbleWraps, fieldSize);

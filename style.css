@@ -1,6 +1,6 @@
 body {
   /*background-color: #1e293b;*/ /* Dark background to make bubbles stand out */
-  background: url(./cardboard-bg.jpg);
+  background: url(./cardboard-bg2-compressed.jpg);
   background-size: cover;
   /*display: flex;
   justify-content: center;
@@ -155,6 +155,7 @@ body {
 }
 
 .field-holder {
+  position: relative;
   width: 380px;
   height: 380px;
   margin: 10px auto 0;
@@ -695,6 +696,8 @@ body {
   .digital-display {
     display: inline-block;
     background-color: #9ead86;
+    position: relative;
+    z-index: 20;
 
     padding: 4px 10px;
     border: solid 1px #333;
@@ -746,5 +749,38 @@ body {
   50% {
     transform: scale(1.08);
     opacity: 1;
+  }
+}
+
+.tape {
+  position: absolute;
+  width: 100px;
+  height: 92px;
+  background: url(./tape.png);
+  background-size: cover;
+  z-index: 10;
+  pointer-events: none;
+
+  &.tape1 {
+      left: -52px;
+      bottom: -28px;
+  }
+
+  &.tape2 {
+      right: -52px;
+      bottom: -40px;
+      transform: rotate(-67deg);
+  }
+
+  &.tape3 {
+      left: -52px;
+      top: -40px;
+      transform: rotate(130deg);
+  }
+
+  &.tape4 {
+      right: -71px;
+      top: -32px;
+      transform: rotate(74deg);
   }
 }
