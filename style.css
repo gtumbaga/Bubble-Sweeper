@@ -489,26 +489,51 @@ body {
     0 0 0 3px rgba(250, 204, 21, 0.8);
 }
 
+@property --led-hi {
+  syntax: "<color>";
+  inherits: false;
+  initial-value: #fef08a;
+}
+
+@property --led-mid {
+  syntax: "<color>";
+  inherits: false;
+  initial-value: #eab308;
+}
+
+@property --led-lo {
+  syntax: "<color>";
+  inherits: false;
+  initial-value: #713f12;
+}
+
 .bubble-wrap.flagged::before {
   content: "";
   position: absolute;
+
+  /*--led-size: 14px;*/
+  /*--led-size: 58px;*/
+  --led-size: 60px;
+
   top: 50%;
   left: 50%;
-  width: 14px;
-  height: 14px;
-  margin: -7px 0 0 -7px;
+  width: var(--led-size);
+  height: var(--led-size);
+  margin: calc(-1 * var(--led-size) / 2) 0 0 calc(-1 * var(--led-size) / 2);
+
   border-radius: 50%;
+
   background: radial-gradient(
     circle at 35% 35%,
-    #fecaca 0%,
-    #ef4444 55%,
-    #7f1d1d 100%
+    var(--led-hi) 0%,
+    var(--led-mid) 55%,
+    var(--led-lo) 100%
   );
   z-index: 3;
   pointer-events: none;
   animation:
     flag-pop 0.4s ease-out,
-    led-flash 1s ease-in-out infinite;
+    led-flash 2s ease-in-out infinite;
 }
 
 @keyframes flag-pop {
@@ -529,12 +554,16 @@ body {
 /* Continuous blink, like an LED indicator light */
 @keyframes led-flash {
   0%, 100% {
-    opacity: 1;
-    box-shadow: 0 0 8px 3px rgba(239, 68, 68, 0.9);
+    box-shadow: 0 0 3px 3px rgba(234, 179, 8, 0.9);
+    --led-hi: #fef08a;
+    --led-mid: #eab308;
+    --led-lo: #713f12;
   }
   50% {
-    opacity: 0.3;
-    box-shadow: 0 0 2px 1px rgba(239, 68, 68, 0.3);
+    box-shadow: 0 0 3px 3px rgba(234, 179, 8, 0.3);
+    --led-hi: #ded06a;
+    --led-mid: #daa300;
+    --led-lo: #612f02;
   }
 }
 
@@ -716,7 +745,7 @@ body {
     letter-spacing: 1px;
   }
 
-  /* Same blinking red LED used to mark a flagged mine on the board. */
+  /* Same blinking yellow LED used to mark a flagged mine on the board. */
   .flag-icon {
     display: inline-block;
     width: 14px;
@@ -724,11 +753,11 @@ body {
     border-radius: 50%;
     background: radial-gradient(
       circle at 35% 35%,
-      #fecaca 0%,
-      #ef4444 55%,
-      #7f1d1d 100%
+      var(--led-hi) 0%,
+      var(--led-mid) 55%,
+      var(--led-lo) 100%
     );
-    animation: led-flash 1s ease-in-out infinite;
+    animation: led-flash 2s ease-in-out infinite;
   }
 
   .timer-icon {

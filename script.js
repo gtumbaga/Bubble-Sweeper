@@ -7,7 +7,7 @@ const loseSound = document.getElementById('lose-sound');
 const winSound = document.getElementById('win-sound');
 const newSound = document.getElementById('new-sound');
 
-winSound.volume = 0.55;
+winSound.volume = 0.45;
 
 let fieldSize = 5;
 const MINE_RATIO = 0.12;
@@ -49,7 +49,7 @@ const playSound = (audioElement) => {
 // concatenated file (intro immediately followed by the loop section, no
 // codec artifacts in between) so one AudioBufferSourceNode can just loop
 // natively between two points within it - no gap, no scheduling math.
-const MUSIC_VOLUME = 0.75;
+const MUSIC_VOLUME = 0.55;
 const musicGain = audioContext.createGain();
 musicGain.connect(audioContext.destination);
 musicGain.gain.value = MUSIC_VOLUME;
