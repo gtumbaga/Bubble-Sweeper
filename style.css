@@ -1,5 +1,7 @@
 body {
-  background-color: #1e293b; /* Dark background to make bubbles stand out */
+  /*background-color: #1e293b;*/ /* Dark background to make bubbles stand out */
+  background: url(./cardboard-bg.jpg);
+  background-size: cover;
   /*display: flex;
   justify-content: center;
   align-items: center;*/
@@ -16,41 +18,131 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   gap: 16px;
-  max-width: 420px;
+  max-width: 400px;
   margin: 0 auto;
-  padding: 40px 24px;
-  text-align: center;
-  color: #f1f5f9;
+  padding: 0;
   font-family: system-ui, sans-serif;
+  /*text-shadow: 0 0 10px rgba(0, 0, 0, 0.5);*/
+
+  background: #fff;
+  width: 100%;
+  height: 540px;
+  border-radius: 8px;
+  box-shadow: 0 0px 8px rgba(0, 0, 0, .75);
+  font-family: arial;
+
+  .title-holder {
+    text-align: center;
+    border-bottom: solid 3px #333;
+    padding-bottom: 16px;
+    width: 100%;
+
+  }
+
+  .label-body {
+    height: 260px;
+  }
+
+  .label-footer {
+      border: solid 5px #333;
+      border-left: none;
+      border-right: none;
+      width: 100%;
+
+      svg {
+          width: 200px;
+          display: block;
+          margin: 0 auto;
+      }
+
+      label {
+          display: block;
+          text-align: center;
+          font-size: 10px;
+          font-weight: bold;
+          text-transform: uppercase;
+      }
+  }
+
+  .label-header {
+     position: relative;
+     width: 100%;
+     height: 90px;
+     border-bottom: solid 3px #333;
+
+    .service-level {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 70px;
+        height: 90px;
+        line-height: 80px;
+        text-align: center;
+
+        font-size: 60px;
+        font-weight: bold;
+
+        border: solid 3px #333;
+        border-top: none;
+        border-left: none;
+    }
+
+    .stamp {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        width: 90px;
+        height: 50px;
+        font-size: 8px;
+        line-height: 1;
+        padding: 4px;
+        text-align: center;
+        text-transform: uppercase;
+        border: solid 3px #333;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+  }
 }
 
 .welcome-screen h1 {
   margin: 0;
-  font-size: 32px;
+  font-size: 21px;
+  text-transform: uppercase;
+  display: block;
+  width: 100%;
 }
 
 .welcome-screen p {
   margin: 0;
-  color: #cbd5e1;
-  line-height: 1.5;
+  font-size: 24px;
+  line-height: 1;
+  padding: 10px;
 }
 
 .welcome-screen button {
+  display: block;
+  margin: 0 auto;
+  margin-top: 40px;
   padding: 12px 28px;
-  border: none;
+  border: solid 3px #333;
   border-radius: 8px;
-  background: #38bdf8;
-  color: #0f172a;
-  font-size: 16px;
+  /*background: #38bdf8;*/
+  background: #fff;
+  color: #333;
+  font-size: 24px;
   font-weight: 700;
   cursor: pointer;
-  transition: background 0.15s ease, transform 0.1s ease;
+  transition: background 0.3s ease, transform 0.1s ease, color .3s ease;
 }
 
 .welcome-screen button:hover {
-  background: #7dd3fc;
+  background: #333;
+  color: #fff;
 }
 
 .welcome-screen button:active {
@@ -75,6 +167,7 @@ body {
 .controls {
   width: 380px;
   margin: 0 auto;
+  padding-bottom: 14px;
   display: grid;
   grid-template-columns: 1fr auto 1fr;
   align-items: center;
@@ -96,13 +189,22 @@ body {
   gap: 6px;
 }
 
+.btn {
+    border: none;
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.5);
+    color: #000;
+    height: 28px;
+    min-width: 100px;
+    cursor: pointer;
+}
 .stepper-btn {
   width: 28px;
   height: 28px;
   border: none;
   border-radius: 6px;
-  background: rgba(255, 255, 255, 0.1);
-  color: #f1f5f9;
+  background: rgba(255, 255, 255, 0.5);
+  color: #000;
   font-size: 18px;
   line-height: 1;
   cursor: pointer;
@@ -112,9 +214,6 @@ body {
   transition: background 0.15s ease;
 }
 
-.stepper-btn:hover {
-  background: rgba(255, 255, 255, 0.2);
-}
 
 #mute-audio,
 #mute-music {
@@ -133,6 +232,8 @@ body {
   transition: background 0.15s ease;
 }
 
+.btn:hover,
+.stepper-btn:hover,
 #mute-audio:hover,
 #mute-music:hover {
   background: rgba(255, 255, 255, 0.75);
@@ -185,8 +286,8 @@ body {
   text-align: center;
   border: none;
   border-radius: 6px;
-  background: rgba(255, 255, 255, 0.1);
-  color: #f1f5f9;
+  background: rgba(255, 255, 255, 0.5);
+  color: #000;
   font-size: 14px;
   appearance: textfield;
   -moz-appearance: textfield;
@@ -205,7 +306,8 @@ body {
   grid-template-columns: repeat(var(--field-size, 5), 60px);
   gap: 10px;
   padding: 20px;
-  background: rgba(255, 255, 255, 0.1);
+  /*background: rgba(255, 255, 255, 0.1);*/
+  background: rgba(155, 200, 255, 0.4);
   border-radius: 12px;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
   /* Scaled down to fit .field-holder for larger field sizes; set in script.js */
@@ -444,6 +546,7 @@ body {
   font-family: system-ui, sans-serif;
   font-weight: 700;
   font-size: 20px;
+  /*text-shadow: 0 0 5px rgba(0, 0, 0, 0.5);*/
   opacity: 0;
   pointer-events: none;
   z-index: 2;
@@ -454,20 +557,29 @@ body {
   opacity: 1;
 }
 
-.count[data-count="1"] { color: #60a5fa; }
+/*.count[data-count="1"] { color: #60a5fa; }
 .count[data-count="2"] { color: #4ade80; }
 .count[data-count="3"] { color: #f87171; }
 .count[data-count="4"] { color: #a78bfa; }
 .count[data-count="5"] { color: #fbbf24; }
 .count[data-count="6"] { color: #22d3ee; }
 .count[data-count="7"] { color: #e5e7eb; }
-.count[data-count="8"] { color: #9ca3af; }
+.count[data-count="8"] { color: #9ca3af; }*/
+.count[data-count="1"] { color: #1d4ed8; } /* Deep Blue */
+.count[data-count="2"] { color: #15803d; } /* Forest Green */
+.count[data-count="3"] { color: #b91c1c; } /* Deep Red */
+.count[data-count="4"] { color: #6d28d9; } /* Deep Purple */
+.count[data-count="5"] { color: #b45309; } /* Deep Amber/Warm Brown */
+.count[data-count="6"] { color: #0e7490; } /* Dark Cyan/Teal */
+.count[data-count="7"] { color: #1f2937; } /* Dark Charcoal (replaces light gray) */
+.count[data-count="8"] { color: #4b5563; } /* Slate Gray (replaces mid-gray) */
 
 /* 8. Game over: once a mine is popped, every mine is revealed and the
    whole grid is locked so no further bubbles can be interacted with. */
 .bubblewrap-container.game-over,
 .bubblewrap-container.game-won {
   pointer-events: none;
+  opacity: .8;
 }
 
 .bubble-wrap.revealed-mine .bubble {
@@ -537,17 +649,32 @@ body {
   text-align: center;
   font-family: system-ui, sans-serif;
   font-weight: 700;
-  font-size: 1.25rem;
+  font-size: 24px;
   min-height: 1.5em;
   margin-top: 12px;
+
+  /* lets try to center it on the playfield */
+  position: absolute;
+  text-align: center;
+  width: 400px;
+  left: 50%;
+  margin-left: -200px;
+  top: 262px;
+  font-size: 60px;
+  z-index: 999;
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+  pointer-events: none;
+
+  /*transform: rotate(45deg);*/
+  animation: breathe 3s ease-in-out infinite;
 }
 
 .game-message.win {
-  color: #4ade80;
+  color: #15803d;
 }
 
 .game-message.lose {
-  color: #ef4444;
+  color: #b91c1c;
 }
 
 .data-holder {
@@ -609,4 +736,15 @@ body {
     content: "\1F550"; /* clock face */
   }
 
+}
+
+@keyframes breathe {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.5;
+  }
+  50% {
+    transform: scale(1.08);
+    opacity: 1;
+  }
 }

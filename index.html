@@ -2,7 +2,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bubble Sweeper</title>
+    <title>Bubble Wrap Sweeper</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -23,9 +23,84 @@
     <!-- Shown first so the game's first user interaction (the Start button)
          can satisfy the browser's autoplay-gesture requirement for bg-music. -->
     <div id="welcome-screen" class="welcome-screen">
-        <h1>Bubble Sweeper</h1>
-        <p>Pop every safe bubble, flag every bomb, and don't get caught in the pop!</p>
-        <button id="start-game-button">Start Game</button>
+        <div class="label-header">
+            <div class="service-level">B</div>
+            <div class="stamp">
+                Priority Mail<br />
+                US Postage Fake<br />
+                This is just a<br />
+                Game
+            </div>
+        </div>
+        <div class="title-holder">
+            <h1>Bubble Wrap Sweeper</h1>
+        </div>
+        <div class="label-body">
+            <p>Pop every safe bubble, flag every bomb, and don't get caught in the pop!</p>
+            <button id="start-game-button">Start Game</button>
+        </div>
+        <div class="label-footer">
+            <label>Tracking# - EP</label>
+            <div class="fake-barcode">
+                <svg viewBox="0 0 200 50" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none" width="100%" height="50">
+                    <rect x="0" y="0" width="200" height="50" fill="white"/>
+                    <g fill="black">
+                        <rect x="2" y="5" width="2" height="40"/>
+                        <rect x="6" y="5" width="1" height="40"/>
+                        <rect x="9" y="5" width="3" height="40"/>
+                        <rect x="14" y="5" width="1" height="40"/>
+                        <rect x="17" y="5" width="2" height="40"/>
+                        <rect x="21" y="5" width="1" height="40"/>
+                        <rect x="24" y="5" width="4" height="40"/>
+                        <rect x="30" y="5" width="1" height="40"/>
+                        <rect x="33" y="5" width="2" height="40"/>
+                        <rect x="37" y="5" width="1" height="40"/>
+                        <rect x="40" y="5" width="3" height="40"/>
+                        <rect x="45" y="5" width="1" height="40"/>
+                        <rect x="48" y="5" width="2" height="40"/>
+                        <rect x="52" y="5" width="1" height="40"/>
+                        <rect x="55" y="5" width="4" height="40"/>
+                        <rect x="61" y="5" width="1" height="40"/>
+                        <rect x="64" y="5" width="2" height="40"/>
+                        <rect x="68" y="5" width="1" height="40"/>
+                        <rect x="71" y="5" width="3" height="40"/>
+                        <rect x="76" y="5" width="1" height="40"/>
+                        <rect x="79" y="5" width="1" height="40"/>
+                        <rect x="82" y="5" width="2" height="40"/>
+                        <rect x="86" y="5" width="4" height="40"/>
+                        <rect x="92" y="5" width="1" height="40"/>
+                        <rect x="95" y="5" width="2" height="40"/>
+                        <rect x="99" y="5" width="1" height="40"/>
+                        <rect x="102" y="5" width="3" height="40"/>
+                        <rect x="107" y="5" width="1" height="40"/>
+                        <rect x="110" y="5" width="2" height="40"/>
+                        <rect x="114" y="5" width="1" height="40"/>
+                        <rect x="117" y="5" width="4" height="40"/>
+                        <rect x="123" y="5" width="1" height="40"/>
+                        <rect x="126" y="5" width="2" height="40"/>
+                        <rect x="130" y="5" width="1" height="40"/>
+                        <rect x="133" y="5" width="3" height="40"/>
+                        <rect x="138" y="5" width="1" height="40"/>
+                        <rect x="141" y="5" width="2" height="40"/>
+                        <rect x="145" y="5" width="1" height="40"/>
+                        <rect x="148" y="5" width="4" height="40"/>
+                        <rect x="154" y="5" width="1" height="40"/>
+                        <rect x="157" y="5" width="2" height="40"/>
+                        <rect x="161" y="5" width="1" height="40"/>
+                        <rect x="164" y="5" width="3" height="40"/>
+                        <rect x="169" y="5" width="1" height="40"/>
+                        <rect x="172" y="5" width="2" height="40"/>
+                        <rect x="176" y="5" width="1" height="40"/>
+                        <rect x="179" y="5" width="4" height="40"/>
+                        <rect x="185" y="5" width="1" height="40"/>
+                        <rect x="188" y="5" width="2" height="40"/>
+                        <rect x="192" y="5" width="1" height="40"/>
+                        <rect x="195" y="5" width="3" height="40"/>
+                    </g>
+                </svg>
+            </div>
+            <label>1234 5678 9109 8765 4321 00</label>
+        </div>
     </div>
 
     <!-- Bubbles are generated dynamically in script.js based on fieldSize -->
@@ -39,7 +114,7 @@
                 </div>
             </div>
             <div>
-                <button id="new-game-button">New Game</button>
+                <button class="btn" id="new-game-button">New Game</button>
             </div>
             <div class="audio-controls">
                 <input type="checkbox" id="mute-music" aria-label="Mute music" />

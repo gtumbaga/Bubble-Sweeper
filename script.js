@@ -313,7 +313,7 @@ const triggerGameOver = () => {
   });
 
   container.classList.add('game-over');
-  setGameMessage('Game Over! You popped a bomb!', 'lose');
+  setGameMessage('Game Over!', 'lose');
 };
 
 // A win happens when every non-mine bubble has been popped.
@@ -540,6 +540,7 @@ const applyFieldSize = (value) => {
   fieldSize = clamped;
   startNewGame();
   playSound(newSound);
+  stopMusic();
 };
 
 fieldSizeInput.addEventListener('change', () => {
@@ -568,6 +569,7 @@ const muteMusicCheckbox = document.getElementById('mute-music');
 musicGain.gain.value = muteMusicCheckbox.checked ? 0 : MUSIC_VOLUME;
 muteMusicCheckbox.addEventListener('change', () => {
   musicGain.gain.value = muteMusicCheckbox.checked ? 0 : MUSIC_VOLUME;
+  playSound(newSound);
 });
 
 const formatNumber = (num) => {
