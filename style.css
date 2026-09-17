@@ -310,7 +310,7 @@ body {
   padding: 20px;
   position: relative;
   /*background: rgba(255, 255, 255, 0.1);*/
-  background: rgba(155, 200, 255, 0.4);
+  background: rgba(155, 200, 255, 0.25);
   border-radius: 12px;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
   /* Scaled down only when the sheet can't fit on screen; set in script.js */
@@ -611,7 +611,7 @@ body {
 .bubblewrap-container.game-over,
 .bubblewrap-container.game-won {
   pointer-events: none;
-  opacity: .8;
+  /*opacity: .75;*/
 }
 
 .bubble-wrap.revealed-mine .bubble {
@@ -792,6 +792,7 @@ body {
   background-size: cover;
   z-index: 10;
   pointer-events: none;
+  opacity: .5;
 
   &.tape1 {
       left: -52px;
