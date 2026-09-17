@@ -317,6 +317,18 @@ body {
   transform-origin: center center;
 }
 
+.bubblewrap-container,
+.bubblewrap-container *
+{
+    /* ensure all text not selectable*/
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+
+}
+
+
 /* Wraps each bubble + its remnant shards so they can be positioned together */
 .bubble-wrap {
   position: relative;
