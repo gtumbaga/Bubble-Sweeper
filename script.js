@@ -1,13 +1,16 @@
-const popSound = document.getElementById('pop-sound');
-const multiPopSound = document.getElementById('multi-pop-sound');
-const warningSound = document.getElementById('warning-sound');
-const warningSoundReverse = document.getElementById('warning-sound-reverse');
-const warningSoundDeny = document.getElementById('warning-sound-deny');
-const loseSound = document.getElementById('lose-sound');
-const winSound = document.getElementById('win-sound');
-const newSound = document.getElementById('new-sound');
-
-winSound.volume = 0.45;
+// Source URLs are read off the (still-preloaded) <audio> elements so the
+// filenames only live in index.html, but playback itself goes through the
+// Web Audio API below instead of these elements' own play()/cloneNode().
+const soundSourceUrls = {
+  pop: document.getElementById('pop-sound').src,
+  multiPop: document.getElementById('multi-pop-sound').src,
+  warning: document.getElementById('warning-sound').src,
+  warningReverse: document.getElementById('warning-sound-reverse').src,
+  warningDeny: document.getElementById('warning-sound-deny').src,
+  lose: document.getElementById('lose-sound').src,
+  win: document.getElementById('win-sound').src,
+  new: document.getElementById('new-sound').src,
+};
 
 let fieldSize = 5;
 const MINE_RATIO = 0.12;
@@ -19,25 +22,56 @@ let timerInterval = null;
 const LONG_PRESS_MS = 300;
 const SHARDS_PER_BUBBLE = 6;
 
-// Regular <audio> elements can't play backwards (no negative playbackRate
-// support), so the warning sound is decoded into a Web Audio buffer once,
-// then played forwards (flagging) or from a reversed copy (unflagging).
 const AudioContextClass = window.AudioContext || window.webkitAudioContext;
 const audioContext = new AudioContextClass();
-let warningBufferPromise = null;
-let reversedWarningBuffer = null;
 let flagCounter = 0;
 let elapsedTime = 0;
 let shouldBeTiming = false;
 let isFirstClick = true;
 let isMuted = false;
 
+// One-shot sound effects are decoded into Web Audio buffers once up front,
+// then played by spinning up a lightweight AudioBufferSourceNode per call -
+// unlike <audio>.cloneNode(), this doesn't create a new media element (and
+// its decoder) every time a sound plays, which was piling up over long play
+// sessions (especially noticeable on iOS Safari).
+const soundBuffers = {};
+const soundBufferPromises = Object.entries(soundSourceUrls).map(
+  ([name, url]) =>
+    fetch(url)
+      .then((response) => response.arrayBuffer())
+      .then((arrayBuffer) => audioContext.decodeAudioData(arrayBuffer))
+      .then((buffer) => {
+        soundBuffers[name] = buffer;
+      })
+);
+
 // Central place all one-shot sound effects go through, so muting can be
 // enforced in a single spot instead of guarding every call site.
-const playSound = (audioElement) => {
+const playSound = (name, volume = 1) => {
   if (isMuted) return;
-  const sound = audioElement.cloneNode();
-  sound.play();
+  const buffer = soundBuffers[name];
+  // Buffers finish decoding within moments of page load; if a sound somehow
+  // fires before that (e.g. a very fast first click), just skip it rather
+  // than throw - there's nothing sensible to play yet.
+  if (!buffer) return;
+
+  if (audioContext.state === 'suspended') {
+    audioContext.resume().catch(() => {});
+  }
+
+  const source = audioContext.createBufferSource();
+  source.buffer = buffer;
+
+  if (volume === 1) {
+    source.connect(audioContext.destination);
+  } else {
+    const gainNode = audioContext.createGain();
+    gainNode.gain.value = volume;
+    source.connect(gainNode).connect(audioContext.destination);
+  }
+
+  source.start();
 };
 
 // --- Seamless background music (single combined track, native loop points) ---
@@ -124,10 +158,10 @@ const stopMusic = () => {
 // Plays the warning sound forwards when flagging, or reversed when unflagging.
 const playWarningSound = async (reverse) => {
   if (!reverse) {
-    playSound(warningSound);
+    playSound('warning');
     return;
   }
-  playSound(warningSoundReverse);
+  playSound('warningReverse');
 };
 
 // Loads debug.css (which visually flags mines) when ?debug=1 is in the URL.
@@ -271,7 +305,7 @@ const revealCascade = (wraps, size, startIndex) => {
   // If the cascade spread past the clicked bubble, play a distinct sound
   // for revealing multiple bubbles at once.
   if (additionalReveals > 0) {
-    playSound(multiPopSound);
+    playSound('multiPop');
   }
 };
 const container = document.querySelector('.bubblewrap-container');
@@ -327,7 +361,7 @@ const setGameMessage = (text, variant) => {
 const triggerGameOver = () => {
   stopTimer();
   stopMusic();
-  playSound(loseSound);
+  playSound('lose');
 
   bubbleWraps.forEach((wrap) => {
     if (wrap.classList.contains('mine')) {
@@ -356,7 +390,7 @@ const checkWinCondition = () => {
 // Celebrates the win: reveals any still-hidden mines (tinted green, not red,
 // since nothing exploded) and locks the grid from further interaction.
 const triggerWin = () => {
-  playSound(winSound);
+  playSound('win', 0.45);
 
   stopTimer();
   stopMusic();
@@ -409,7 +443,7 @@ const wireUpBubble = (wrap, index) => {
     // Once the flag counter runs out, no more bubbles can be flagged
     // (but existing flags can still be removed).
     if (!isCurrentlyFlagged && flagCounter <= 0) {
-      playSound(warningSoundDeny);
+      playSound('warningDeny');
       return false;
     }
 
@@ -505,7 +539,7 @@ const wireUpBubble = (wrap, index) => {
         return;
       }
 
-      playSound(popSound);
+      playSound('pop');
 
       revealCascade(bubbleWraps, fieldSize, index);
       checkWinCondition();
@@ -551,7 +585,7 @@ const startNewGame = () => {
 const newGameButton = document.getElementById('new-game-button');
 newGameButton.addEventListener('click', () => {
   startNewGame();
-  playSound(newSound);
+  playSound('new');
   stopMusic();
 });
 
@@ -568,7 +602,7 @@ const applyFieldSize = (value) => {
   fieldSizeInput.value = String(clamped);
   fieldSize = clamped;
   startNewGame();
-  playSound(newSound);
+  playSound('new');
   stopMusic();
 };
 
@@ -590,7 +624,7 @@ isMuted = muteCheckbox.checked;
 muteCheckbox.addEventListener('change', () => {
   isMuted = muteCheckbox.checked;
   if (!isMuted) {
-    playSound(newSound);
+    playSound('new');
   }
 });
 
@@ -598,7 +632,7 @@ const muteMusicCheckbox = document.getElementById('mute-music');
 musicGain.gain.value = muteMusicCheckbox.checked ? 0 : MUSIC_VOLUME;
 muteMusicCheckbox.addEventListener('change', () => {
   musicGain.gain.value = muteMusicCheckbox.checked ? 0 : MUSIC_VOLUME;
-  playSound(newSound);
+  playSound('new');
 });
 
 const formatNumber = (num) => {

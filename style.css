@@ -54,7 +54,10 @@ body {
   transform: rotate(90deg);
 }
 
-@media screen and (orientation: landscape) {
+/* (hover: none) and (pointer: coarse) restrict this to touchscreen devices
+   (phones/tablets) so laptops and desktops with a landscape display, which
+   have a fine pointer and hover support, are never affected. */
+@media screen and (orientation: landscape) and (hover: none) and (pointer: coarse) {
   .rotate-overlay {
     display: flex;
   }
