@@ -311,6 +311,7 @@ const revealCascade = (wraps, size, startIndex) => {
 const container = document.querySelector('.bubblewrap-container');
 const fieldHolder = document.querySelector('.field-holder');
 const gameMessage = document.getElementById('game-message');
+
 const VIEWPORT_PADDING = 16;
 
 // Lets the grid keep its natural size when it fits on screen, and only
@@ -403,6 +404,10 @@ const triggerWin = () => {
 
   container.classList.add('game-won');
   setGameMessage('You Win!', 'win');
+
+
+  // const winnerNextLevelBtn = document.getElementById('next-level');
+  // winnerNextLevelBtn.classList.add('win');
 };
 
 const createBubbleWrap = () => {
@@ -558,6 +563,8 @@ const startNewGame = () => {
   // Clear out any bubbles from a previous game.
   container.innerHTML = '';
   container.classList.remove('game-over', 'game-won');
+  // const winnerNextLevelBtn = document.getElementById('next-level');
+  // winnerNextLevelBtn.classList.remove('win');
   setGameMessage('');
   bubbleWraps.length = 0;
 
@@ -592,6 +599,7 @@ newGameButton.addEventListener('click', () => {
 const fieldSizeInput = document.getElementById('field-size-input');
 const fieldSizeDecrement = document.getElementById('field-size-decrement');
 const fieldSizeIncrement = document.getElementById('field-size-increment');
+// const winnerNextLevelBtn = document.getElementById('next-level');
 const FIELD_SIZE_MIN = parseInt(fieldSizeInput.min, 10);
 const FIELD_SIZE_MAX = parseInt(fieldSizeInput.max, 10);
 
@@ -617,6 +625,18 @@ fieldSizeDecrement.addEventListener('click', () => {
 
 fieldSizeIncrement.addEventListener('click', () => {
   applyFieldSize(parseInt(fieldSizeInput.value, 10) + 1);
+});
+// winnerNextLevelBtn.addEventListener('click', () => {
+//   applyFieldSize(parseInt(fieldSizeInput.value, 10) + 1);
+// });
+gameMessage.addEventListener('click', () => {
+  // if it it has the class win
+    if (gameMessage.classList.contains('win')) {
+        fieldSizeIncrement.click();
+    } else {
+      // const newGameButton = document.getElementById('new-game-button');
+      newGameButton.click();
+    }
 });
 
 const muteCheckbox = document.getElementById('mute-audio');

@@ -744,6 +744,11 @@ body {
 .game-message {
   pointer-events: none;
   touch-action: manipulation;
+  /* ensure all text not selectable*/
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
   text-align: center;
   font-family: Arial, sans-serif;
   font-weight: 700;
@@ -762,18 +767,27 @@ body {
   font-size: 60px;
   z-index: 999;
   text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
-  pointer-events: none;
 
   /*transform: rotate(45deg);*/
   animation: breathe 3s ease-in-out infinite;
+
+  height: 100%;
+  top: 0;
+  justify-content: center;
+  display: flex;
+  align-items: center;
 }
 
 .game-message.win {
   color: #15803d;
+  pointer-events: auto;
+  cursor: pointer;
 }
 
 .game-message.lose {
   color: #b91c1c;
+  pointer-events: auto;
+  cursor: pointer;
 }
 
 .data-holder {
@@ -890,4 +904,19 @@ body {
       top: -32px;
       transform: rotate(74deg);
   }
+}
+
+#next-level {
+    display: none;
+    position: absolute;
+    z-index: 999;
+    cursor: pointer;
+    border-radius: 8px;
+    height: 120px;
+    font-size: 20px;
+    width: 120px;
+
+    &.win  {
+        display: block;
+    }
 }
